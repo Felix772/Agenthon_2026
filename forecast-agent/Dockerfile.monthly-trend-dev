@@ -1,0 +1,5 @@
+# Development experiment: retain the previously admitted image and its pinned
+# dependencies, replacing only the participant forecast modules.
+FROM forecast-agent:local-20260925
+ENV AGENTHON_MONTHLY_TREND_AUTO=1
+COPY forecast.py joint_model.py /app/

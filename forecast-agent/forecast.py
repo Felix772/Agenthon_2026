@@ -158,13 +158,17 @@ def main(argv=None):
     if args.monthly_trend and (not monthly or target != 'level' or args.drift
                                or args.method == 'contract-probe'):
         raise ValueError('Monthly trend requires a monthly level target, Gaussian/bootstrap sampling and no generic drift')
+    monthly_trend = args.monthly_trend or (
+        os.environ.get('AGENTHON_MONTHLY_TREND_AUTO') == '1'
+        and monthly and target == 'level' and not args.drift
+        and args.method in ('gaussian', 'bootstrap'))
     if args.method == 'contract-probe':
         samples = np.tile(np.array([anchor[a] for a in grid.assets])[None, :, None], (args.n_draws, 1, len(grid.horizons)))
         stats = {'method': 'contract-probe', 'spread': 'zero; interface testing only'}
     else:
         samples, stats = joint_samples(histories, grid, steps, target=target, monthly=monthly,
             draws=args.n_draws, seed=args.seed, method=args.method, shrinkage=args.shrinkage,
-            drift=args.drift, window=args.window, monthly_trend=args.monthly_trend)
+            drift=args.drift, window=args.window, monthly_trend=monthly_trend)
     output = args.out.parent.resolve()
     if args.out.name != NAMES[0] or output.is_relative_to(args.panels.parent.resolve()):
         raise ValueError('Use forecast.parquet outside the input unit')

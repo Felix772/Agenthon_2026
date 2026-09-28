@@ -95,6 +95,32 @@ class ContractTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 run(unit, asof, root / 'missing-map')
 
+    def test_development_image_auto_trend_matches_explicit_monthly_only(self):
+        def invoke(unit, asof, out, extra=()):
+            main(['forecast', '--panels', str(unit / 'panels'), '--text', str(unit / 'text'),
+                  '--asof', asof, '--out', str(out / 'forecast.parquet'), '--seed', '17', *extra])
+            return pd.read_parquet(out / 'forecast.parquet').value.to_numpy()
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            unit, asof = fixture(root, monthly=True)
+            with patch.dict('os.environ', {'AGENTHON_MONTHLY_TREND_AUTO': '0'}):
+                baseline = invoke(unit, asof, root / 'baseline')
+                explicit = invoke(unit, asof, root / 'explicit', ['--monthly-trend'])
+            with patch.dict('os.environ', {'AGENTHON_MONTHLY_TREND_AUTO': '1'}):
+                automatic = invoke(unit, asof, root / 'automatic')
+            self.assertFalse(np.array_equal(baseline, explicit))
+            np.testing.assert_array_equal(automatic, explicit)
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            unit, asof = fixture(root)
+            with patch.dict('os.environ', {'AGENTHON_MONTHLY_TREND_AUTO': '0'}):
+                baseline = invoke(unit, asof, root / 'baseline')
+            with patch.dict('os.environ', {'AGENTHON_MONTHLY_TREND_AUTO': '1'}):
+                automatic = invoke(unit, asof, root / 'automatic')
+            np.testing.assert_array_equal(automatic, baseline)
+
     def test_missing_asset_duplicate_grid_and_invalid_draw_count(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

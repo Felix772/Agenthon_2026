@@ -32,6 +32,13 @@ Gaussian or bootstrap sampling, and no `--drift`. The default forecast does not
 enable it. The card-shaped retrospective proxy and its vintage limitations are
 recorded in `../project-evidence/t2-card-trend-review-20260927.md`.
 
+`Dockerfile.monthly-trend-dev` is a Development-only experiment based on the
+previously admitted image. It sets `AGENTHON_MONTHLY_TREND_AUTO=1`, which turns
+the same trend on only for eligible monthly-level Gaussian/bootstrap cards;
+daily and return cards retain the incumbent forecast. The ordinary source and
+base image defaults remain unchanged. The two-card fixed-vintage local study
+does not establish a general quality gain or a Final-ready candidate.
+
 The default seed is the organizer-injected `QFBENCH_SEED`, falling back to0 when
 absent. An explicit `--seed` takes precedence. The actual seed is recorded in the
 rationale. Repeated input/seed pairs reproduce the samples; this does not certify
