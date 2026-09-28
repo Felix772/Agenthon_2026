@@ -1,0 +1,9 @@
+# Build only over the immutable locally verified and published runtime image.
+FROM simulation-agent:runtime-20260925
+COPY simulate_batch_parallel.py /opt/participant_build/simulate_batch_parallel.py
+COPY simulate-batch.parallel /opt/participant_build/simulate-batch.parallel
+COPY patch_parallel_batch.py /opt/participant_build/patch_parallel_batch.py
+RUN python /opt/participant_build/patch_parallel_batch.py \
+    && rm /opt/participant_build/simulate_batch_parallel.py \
+          /opt/participant_build/simulate-batch.parallel \
+          /opt/participant_build/patch_parallel_batch.py

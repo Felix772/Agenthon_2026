@@ -1,0 +1,8 @@
+#!/bin/sh
+# The package initializer imports numerical libraries before the batch module.
+# Cap their inner pools before Python starts; the single-market verb is untouched.
+export OPENBLAS_NUM_THREADS=1
+export OMP_NUM_THREADS=1
+export MKL_NUM_THREADS=1
+export NUMEXPR_NUM_THREADS=1
+exec python -m abides_fork.simulate_batch "$@"

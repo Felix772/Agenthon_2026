@@ -1,0 +1,6 @@
+# Runtime-only layer on the measured timestamp-cache candidate.
+FROM simulation-agent:format-cache-20260924
+# ABIDES writes relative diagnostic log files. The organizer's /tmp mount is
+# the allowed writable scratch space; do not require an extra /work mount.
+WORKDIR /tmp
+# Both official PATH verbs remain unchanged. The runner supplies the UID.

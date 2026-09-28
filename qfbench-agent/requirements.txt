@@ -1,0 +1,4 @@
+# No extra packages beyond the organizer's finance-bench-sandbox base.
+# Client/orchestration use the standard library. Numerical packages already
+# in the base include numpy, pandas, scipy, pyarrow and scikit-learn.
+# Exact versions are recorded at /app/runtime-versions.txt in each build.

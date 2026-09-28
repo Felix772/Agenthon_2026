@@ -1,0 +1,1 @@
+"""Minimal QFBench coding agent."""
