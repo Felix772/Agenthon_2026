@@ -1,0 +1,5 @@
+# Daily scored-unit experiment. Keep the admitted monthly image and change
+# only the current-unit daily statistical path; no data or outcomes are copied.
+FROM forecast-agent:monthly-trend-dev-20260928
+ENV AGENTHON_DAILY_ONLINE_SELECT=1
+COPY forecast.py reference_model.py online_model.py /app/

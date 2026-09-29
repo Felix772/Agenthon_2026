@@ -1,0 +1,7 @@
+# Experimental derivative of the frozen, 71/71-admitted unlocked-queue image.
+# Build only after its full paired timing completes. The patch itself guards
+# the exact installed config.py SHA-256 and fails closed if the source differs.
+FROM simulation-agent:unlocked-queue-dev-20260928
+COPY patch_scalar_latency_clip.py /opt/participant_build/patch_scalar_latency_clip.py
+RUN python /opt/participant_build/patch_scalar_latency_clip.py \
+    && rm /opt/participant_build/patch_scalar_latency_clip.py

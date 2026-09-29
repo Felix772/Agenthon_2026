@@ -2,4 +2,4 @@
 # dependencies, replacing only the participant forecast modules.
 FROM forecast-agent:local-20260925
 ENV AGENTHON_MONTHLY_TREND_AUTO=1
-COPY forecast.py joint_model.py /app/
+COPY forecast.py joint_model.py reference_model.py online_model.py /app/

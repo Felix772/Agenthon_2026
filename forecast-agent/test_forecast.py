@@ -5,6 +5,7 @@ import shutil
 import tempfile
 import unittest
 from unittest.mock import patch
+import zlib
 
 import numpy as np
 import pandas as pd
@@ -120,6 +121,102 @@ class ContractTests(unittest.TestCase):
             with patch.dict('os.environ', {'AGENTHON_MONTHLY_TREND_AUTO': '1'}):
                 automatic = invoke(unit, asof, root / 'automatic')
             np.testing.assert_array_equal(automatic, baseline)
+
+    def test_daily_reference_profile_changes_scored_shapes_only(self):
+        def invoke(unit, asof, out, extra=()):
+            main(['forecast', '--panels', str(unit / 'panels'), '--text', str(unit / 'text'),
+                  '--asof', asof, '--out', str(out / 'forecast.parquet'), '--seed', '17', *extra])
+            frame = pd.read_parquet(out / 'forecast.parquet')
+            meta = json.loads((out / 'forecast_meta.json').read_text())
+            return frame.value.to_numpy(), meta['rationale']['method']
+
+        for target in ('level', 'log_return'):
+            with tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                unit, asof = fixture(root, target=target)
+                with patch.dict('os.environ', {'AGENTHON_DAILY_REFERENCE_WALK': '0'}):
+                    incumbent = invoke(unit, asof, root / 'incumbent')
+                    explicit = invoke(unit, asof, root / 'explicit', ['--method', 'reference-walk'])
+                with patch.dict('os.environ', {'AGENTHON_DAILY_REFERENCE_WALK': '1'}):
+                    automatic = invoke(unit, asof, root / 'automatic')
+                self.assertFalse(np.array_equal(incumbent[0], explicit[0]))
+                np.testing.assert_array_equal(automatic[0], explicit[0])
+                self.assertEqual(automatic[1], 'reference-walk')
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            unit, asof = fixture(root, monthly=True)
+            with patch.dict('os.environ', {'AGENTHON_DAILY_REFERENCE_WALK': '0'}):
+                incumbent = invoke(unit, asof, root / 'incumbent')
+            with patch.dict('os.environ', {'AGENTHON_DAILY_REFERENCE_WALK': '1'}):
+                automatic = invoke(unit, asof, root / 'automatic')
+            np.testing.assert_array_equal(automatic[0], incumbent[0])
+            self.assertEqual(automatic[1], 'gaussian')
+
+    def test_online_profile_is_daily_only_and_short_history_preserves_incumbent(self):
+        def invoke(unit, asof, out, extra=()):
+            main(['forecast', '--panels', str(unit / 'panels'), '--text', str(unit / 'text'),
+                  '--asof', asof, '--out', str(out / 'forecast.parquet'), '--seed', '17', *extra])
+            values = pd.read_parquet(out / 'forecast.parquet').value.to_numpy()
+            rationale = json.loads((out / 'forecast_rationale.md').read_text().split('\n\n',1)[1])
+            return values, rationale
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            unit, asof = fixture(root)
+            with patch.dict('os.environ', {'AGENTHON_DAILY_ONLINE_SELECT': '0'}):
+                incumbent = invoke(unit, asof, root / 'incumbent')
+                explicit = invoke(unit, asof, root / 'explicit', ['--method', 'online-ensemble'])
+            with patch.dict('os.environ', {'AGENTHON_DAILY_ONLINE_SELECT': '1'}):
+                automatic = invoke(unit, asof, root / 'automatic')
+            np.testing.assert_array_equal(automatic[0], explicit[0])
+            np.testing.assert_array_equal(automatic[0], incumbent[0])
+            self.assertEqual(automatic[1]['fit']['selected_arm'], 'incumbent')
+            self.assertEqual(automatic[1]['fit']['validation_windows'], 0)
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            unit, asof = fixture(root, monthly=True)
+            with patch.dict('os.environ', {'AGENTHON_DAILY_ONLINE_SELECT': '0'}):
+                baseline = invoke(unit, asof, root / 'baseline')
+            with patch.dict('os.environ', {'AGENTHON_DAILY_ONLINE_SELECT': '1'}):
+                automatic = invoke(unit, asof, root / 'automatic')
+            np.testing.assert_array_equal(automatic[0], baseline[0])
+            self.assertEqual(automatic[1]['method'], 'gaussian')
+
+    def test_m0_control_uses_card_seed_and_only_daily_auto_profile(self):
+        def invoke(unit, asof, out, seed, method=None):
+            args = ['forecast', '--panels', str(unit/'panels'), '--text', str(unit/'text'),
+                    '--asof', asof, '--out', str(out/'forecast.parquet'), '--seed', str(seed)]
+            if method:
+                args.extend(['--method', method])
+            main(args)
+            rationale = json.loads((out/'forecast_rationale.md').read_text().split('\n\n', 1)[1])
+            return pd.read_parquet(out/'forecast.parquet').value.to_numpy(), rationale
+
+        for target in ('level', 'log_return'):
+            with tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                unit, asof = fixture(root, target=target)
+                with patch.dict('os.environ', {'AGENTHON_DAILY_M0_CONTROL': '0'}):
+                    first = invoke(unit, asof, root/'first', 17, 'm0-control')
+                    second = invoke(unit, asof, root/'second', 987654, 'm0-control')
+                with patch.dict('os.environ', {'AGENTHON_DAILY_M0_CONTROL': '1'}):
+                    automatic = invoke(unit, asof, root/'automatic', 32)
+                np.testing.assert_array_equal(first[0], second[0])
+                np.testing.assert_array_equal(first[0], automatic[0])
+                self.assertEqual(automatic[1]['method'], 'm0-control')
+                self.assertEqual(first[1]['seed'], zlib.crc32(b'synthetic-contract') & 0x7FFFFFFF)
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            unit, asof = fixture(root, monthly=True)
+            with patch.dict('os.environ', {'AGENTHON_DAILY_M0_CONTROL': '0'}):
+                baseline = invoke(unit, asof, root/'baseline', 17)
+            with patch.dict('os.environ', {'AGENTHON_DAILY_M0_CONTROL': '1'}):
+                automatic = invoke(unit, asof, root/'automatic', 17)
+            np.testing.assert_array_equal(automatic[0], baseline[0])
+            self.assertEqual(automatic[1]['method'], 'gaussian')
 
     def test_missing_asset_duplicate_grid_and_invalid_draw_count(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -1,0 +1,6 @@
+# Exact Development image already passed all 71 public units; change only the
+# single-owner market event queue.  Keep its four-worker batch adapter intact.
+FROM simulation-agent:parallel-batch4-20260927
+COPY patch_unlocked_event_queue.py /opt/participant_build/patch_unlocked_event_queue.py
+RUN python /opt/participant_build/patch_unlocked_event_queue.py \
+    && rm /opt/participant_build/patch_unlocked_event_queue.py

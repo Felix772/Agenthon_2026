@@ -15,6 +15,7 @@ from qfbench2_track_forecasting.horizons import monthly_horizon_steps
 from qfbench2_track_forecasting.limits import ParseLimits
 from qfbench2_track_forecasting.targets import log_return_steps
 from joint_model import joint_samples
+from reference_model import reference_samples
 from text_events import load_text, retrieve
 
 NAMES = ('forecast.parquet', 'forecast_meta.json', 'forecast_rationale.md')
@@ -130,7 +131,9 @@ def main(argv=None):
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--seed', type=int, default=os.environ.get('QFBENCH_SEED', '0'))
     parser.add_argument('--n-draws', type=int, default=500)
-    parser.add_argument('--method', choices=['contract-probe', 'gaussian', 'bootstrap'], default='gaussian')
+    parser.add_argument('--method', choices=['contract-probe', 'gaussian', 'bootstrap',
+                                             'reference-walk', 'online-ensemble',
+                                             'm0-control'], default='gaussian')
     parser.add_argument('--shrinkage', type=float, default=0.1)
     parser.add_argument('--drift', action='store_true')
     parser.add_argument('--monthly-trend', action='store_true',
@@ -155,6 +158,23 @@ def main(argv=None):
             log_return_steps(history.to_numpy())  # Validate simple-return interpretation.
     anchor = {asset: float(series.iloc[-1]) if target == 'level' else 0.0 for asset, series in histories.items()}
     monthly = card['targets'].get('target_frequency', card.get('metadata', {}).get('target_frequency')) == 'monthly'
+    reference_walk = args.method == 'reference-walk' or (
+        os.environ.get('AGENTHON_DAILY_REFERENCE_WALK') == '1'
+        and not monthly and args.method == 'gaussian')
+    online_select = args.method == 'online-ensemble' or (
+        os.environ.get('AGENTHON_DAILY_ONLINE_SELECT') == '1'
+        and not monthly and args.method == 'gaussian')
+    m0_control = args.method == 'm0-control' or (
+        os.environ.get('AGENTHON_DAILY_M0_CONTROL') == '1'
+        and not monthly and args.method == 'gaussian')
+    if sum((reference_walk, online_select, m0_control)) > 1:
+        raise ValueError('Only one daily forecast profile may be active')
+    if reference_walk and (monthly or args.drift or args.monthly_trend or args.n_draws != 500):
+        raise ValueError('Reference walk requires a daily target, 500 draws and no trend override')
+    if online_select and (monthly or args.drift or args.monthly_trend or args.n_draws != 500):
+        raise ValueError('Online selection requires a daily target, 500 draws and no trend override')
+    if m0_control and (monthly or args.drift or args.monthly_trend or args.n_draws != 500):
+        raise ValueError('M0 control requires a daily target, 500 draws and no trend override')
     if args.monthly_trend and (not monthly or target != 'level' or args.drift
                                or args.method == 'contract-probe'):
         raise ValueError('Monthly trend requires a monthly level target, Gaussian/bootstrap sampling and no generic drift')
@@ -165,6 +185,16 @@ def main(argv=None):
     if args.method == 'contract-probe':
         samples = np.tile(np.array([anchor[a] for a in grid.assets])[None, :, None], (args.n_draws, 1, len(grid.horizons)))
         stats = {'method': 'contract-probe', 'spread': 'zero; interface testing only'}
+    elif online_select:
+        from online_model import online_samples
+        samples, stats = online_samples(histories, grid, steps, target=target,
+            seed=args.seed, unit_id=card['task']['id'])
+    elif reference_walk:
+        samples, stats = reference_samples(histories, grid, steps, target=target,
+            draws=args.n_draws, unit_id=card['task']['id'], seed=args.seed)
+    elif m0_control:
+        samples, stats = reference_samples(histories, grid, steps, target=target,
+            draws=args.n_draws, unit_id=card['task']['id'], seed=None)
     else:
         samples, stats = joint_samples(histories, grid, steps, target=target, monthly=monthly,
             draws=args.n_draws, seed=args.seed, method=args.method, shrinkage=args.shrinkage,
@@ -179,18 +209,21 @@ def main(argv=None):
         for draw in range(args.n_draws) for ai, asset in enumerate(grid.assets) for hi, horizon in enumerate(grid.horizons)],
         columns=['draw', 'asset', 'horizon', 'value'])
     frame.to_parquet(output / NAMES[0], index=False)
+    selected_method = ('online-ensemble' if online_select else
+                       'reference-walk' if reference_walk else
+                       'm0-control' if m0_control else args.method)
     meta = {'unit_id': card['task']['id'], 'asof': args.asof, 'representation': 'samples',
         'asset_ids': list(grid.assets), 'horizons': list(grid.horizons), 'n_draws': args.n_draws,
-        'target': target, 'rationale': {'file': NAMES[2], 'method': args.method}}
+        'target': target, 'rationale': {'file': NAMES[2], 'method': selected_method}}
     (output / NAMES[1]).write_text(json.dumps(meta, indent=2) + '\n', encoding='utf-8')
-    rationale = {'method': args.method, 'seed': args.seed,
+    rationale = {'method': selected_method, 'seed': stats.get('seed', args.seed),
         'asof': args.asof, 'anchor': anchor, 'sampling_steps': steps.tolist(),
         'fit': stats, 'quality_evidence': 'not measured by this run',
         'text_contribution': 'none; retrieval audit only, no events inferred', 'model_calls': 0,
         'text_retrieval': text_audit}
     (output / NAMES[2]).write_text('# Forecast rationale\n\n' + json.dumps(rationale, indent=2) + '\n', encoding='utf-8')
     validate_outputs(output, grid, args.n_draws, target)
-    print(f'{args.method} wrote {len(frame)} rows; no quality score computed.')
+    print(f'{selected_method} wrote {len(frame)} rows; no quality score computed.')
     return 0
 
 
