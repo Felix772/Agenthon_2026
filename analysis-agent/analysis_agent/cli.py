@@ -10,7 +10,7 @@ import tempfile
 import time
 
 from .contract import write_answer
-from .pipeline import analyze
+from .pipeline import analyze, fallback_answer
 from .retrieval import RetrievalIndex
 
 
@@ -67,13 +67,24 @@ def failure(task_path, output, code):
         temporary.unlink(missing_ok=True)
 
 
+def write_fallback(task_path, output, index=None, note='Last-resort rule; model output unavailable.'):
+    """Write an admissible model-free answer; return True on success."""
+    try:
+        task = json.loads(Path(task_path).read_text(encoding='utf-8'))
+        write_answer(task, fallback_answer(task, index, note=note), output)
+        return True
+    except Exception:
+        return False
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument('verb', choices=['analyze'])
     parser.add_argument('--task', required=True)
     parser.add_argument('--corpus', required=True)
     parser.add_argument('--out', required=True)
-    parser.add_argument('--timeout', type=float, default=580)
+    # The 600 s container ceiling also covers container creation and any image pull.
+    parser.add_argument('--timeout', type=float, default=520)
     parser.add_argument('--diagnostics', help='Optional local sanitized telemetry JSON path')
     parser.add_argument('--worker', action='store_true', help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
@@ -93,12 +104,17 @@ def main(argv=None):
                                     stderr=subprocess.DEVNULL)
             if result.returncode == 0:
                 return 0
-            failure(args.task, args.out, 'model_or_evidence_unavailable')
+            reason = 'model_or_evidence_unavailable'
         except subprocess.TimeoutExpired:
-            failure(args.task, args.out, 'deadline_exceeded')
+            reason = 'deadline_exceeded'
             diagnostic(args.diagnostics, 'watchdog', 'deadline', started)
+        # An admissible last-resort answer beats a refused unit (worst score).
+        if write_fallback(args.task, args.out):
+            return 0
+        failure(args.task, args.out, reason)
         return 2
     client = None
+    index = None
     stage = 'task'
     try:
         deadline = time.monotonic()+args.timeout-0.5
@@ -120,6 +136,8 @@ def main(argv=None):
                             'KeyError', 'OSError', 'FileNotFoundError', 'JSONDecodeError'}:
             category = 'other'
         diagnostic(args.diagnostics, stage, category, started, client)
+        if stage != 'output' and write_fallback(args.task, args.out, index):
+            return 0
         return 2
 
 

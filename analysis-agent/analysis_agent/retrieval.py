@@ -67,6 +67,20 @@ class Document:
     doc_date: str
     sha256: str
     text: str
+    # Manifest entity labels (scorer 5.2.x): a claim may cite a document only when the
+    # manifest lists the claim's entity on it or marks it `shared`.
+    entity_ids: tuple | None = None
+    shared: bool = False
+
+
+def _labels(entry):
+    raw = entry.get('entity_ids')
+    shared = entry.get('shared') is True
+    if raw is None:
+        return None, shared
+    if not isinstance(raw, list) or not all(isinstance(x, str) and x for x in raw):
+        raise ContractError('invalid manifest entity_ids')
+    return tuple(raw), shared
 
 
 @dataclass(frozen=True)
@@ -100,6 +114,9 @@ class RetrievalIndex:
                 if end == len(doc.text):
                     break
         self.passages = tuple(passages)
+        # When no document carries a label the scorer treats the corpus as unlabelled and
+        # does not apply the entity rule; otherwise unlabelled documents are off-roster.
+        self.labelled = any(d.entity_ids is not None or d.shared for d in self.documents.values())
         self._counts = [Counter(tokens(p.text)) for p in self.passages]
         self._lengths = [sum(c.values()) for c in self._counts]
         self._average = sum(self._lengths)/len(self._lengths) if self._lengths else 1
@@ -146,17 +163,30 @@ class RetrievalIndex:
             if doc_date > limit:
                 excluded.append((doc_id, 'post_cutoff'))
                 continue
-            documents[doc_id] = Document(doc_id, doc['doc_date'], digest, canonical_text(doc))
+            entity_ids, shared = _labels(entry)
+            documents[doc_id] = Document(doc_id, doc['doc_date'], digest, canonical_text(doc),
+                                         entity_ids, shared)
         if not seen:
             raise ContractError('manifest declares no citable documents')
         return cls(documents, cutoff, excluded, **chunk_options)
 
-    def search(self, query, *, top_k=5):
+    def citable_for(self, doc_id, entity_id):
+        """Whether a claim for `entity_id` may cite `doc_id` under the manifest entity rule."""
+        doc = self.documents.get(doc_id)
+        if doc is None:
+            return False
+        if entity_id is None or not self.labelled:
+            return True
+        return doc.shared or entity_id in (doc.entity_ids or ())
+
+    def search(self, query, *, top_k=5, entity_id=None):
         if not isinstance(query, str) or type(top_k) is not int or top_k < 0:
             raise ContractError('invalid query or top_k')
         terms = set(tokens(query))
         results = []
         for passage, count, length in zip(self.passages, self._counts, self._lengths):
+            if not self.citable_for(passage.doc_id, entity_id):
+                continue
             score = 0.0
             for term in sorted(terms):
                 frequency = count[term]

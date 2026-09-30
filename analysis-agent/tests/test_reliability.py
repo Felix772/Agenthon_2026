@@ -40,7 +40,7 @@ def test_supported_response_shapes(case):
 def test_invalid_rows_are_bounded_and_fail_closed(case):
     task, index = setup()
     client = client_for(case)
-    with pytest.raises(ContractError): analyze(task, index, client, time.monotonic()+10)
+    with pytest.raises(ContractError): analyze(task, index, client, time.monotonic()+10, strict=True)
     assert client.requests == 2
 
 
@@ -48,7 +48,7 @@ def test_invalid_rows_are_bounded_and_fail_closed(case):
 def test_transport_failure_has_no_extra_pipeline_retries(case):
     task, index = setup()
     client = client_for(case)
-    with pytest.raises(ModelError): analyze(task, index, client, time.monotonic()+10)
+    with pytest.raises(ModelError): analyze(task, index, client, time.monotonic()+10, strict=True)
     assert client.requests == 1
 
 
@@ -58,7 +58,7 @@ def test_pipeline_cannot_multiply_transport_retries(status):
     client = client_for('bare')
     client.opener.open.side_effect = urllib.error.HTTPError('http://house.invalid', status, 'synthetic', {}, None)
     with patch('agent.model_client.time.sleep'), pytest.raises(ModelError):
-        analyze(task, index, client, time.monotonic()+10)
+        analyze(task, index, client, time.monotonic()+10, strict=True)
     assert client.opener.open.call_count == (1 if status in (401, 403) else 2)
     assert client.requests == (0 if status in (401, 403) else 2)
 
@@ -67,7 +67,7 @@ def test_repairs_share_global_budget_across_groups():
     task, index = setup(n=75)
     client = client_for('repair')
     with pytest.raises(ModelError, match='request budget'):
-        analyze(task, index, client, time.monotonic()+30)
+        analyze(task, index, client, time.monotonic()+30, strict=True)
     assert client.requests == client.opener.open.call_count == 25
 
 
@@ -82,5 +82,5 @@ def test_fence_support_does_not_scan_for_json(prefix, suffix):
         value['choices'][0]['message']['content'] = prefix + value['choices'][0]['message']['content'] + suffix
         return io.BytesIO(json.dumps(value).encode())
     client.opener.open.side_effect = wrapped
-    with pytest.raises(ContractError): analyze(task, index, client, time.monotonic()+10)
+    with pytest.raises(ContractError): analyze(task, index, client, time.monotonic()+10, strict=True)
     assert client.requests == 2

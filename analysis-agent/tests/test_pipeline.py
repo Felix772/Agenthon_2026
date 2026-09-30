@@ -57,7 +57,7 @@ class FakeClient:
 def test_all_types_multigroup(kind):
     task, index = setup(kind, 30)
     client = FakeClient()
-    answer = analyze(task, index, client, time.monotonic()+30)
+    answer = analyze(task, index, client, time.monotonic()+30, strict=True)
     assert client.calls == 10
     assert len(answer['entity_predictions']) == 30
     assert answer['target_type'] == kind
@@ -70,7 +70,7 @@ def test_all_types_multigroup(kind):
 def test_repair_retrieves_and_revalidates(fault):
     task, index = setup(n=2)
     client = FakeClient(fault)
-    assert len(analyze(task, index, client, time.monotonic()+30)['entity_predictions']) == 2
+    assert len(analyze(task, index, client, time.monotonic()+30, strict=True)['entity_predictions']) == 2
     assert client.calls == 2
 
 
@@ -78,15 +78,15 @@ def test_repair_retrieves_and_revalidates(fault):
 def test_permanent_error_never_yields_partial_answer(fault):
     task, index = setup()
     client = FakeClient(fault, permanent=True)
-    with pytest.raises(ContractError): analyze(task, index, client, time.monotonic()+30)
+    with pytest.raises(ContractError): analyze(task, index, client, time.monotonic()+30, strict=True)
     assert client.calls == 2
 
 
 def test_no_evidence_and_deadline_do_not_call_model():
     task, index = setup()
     client = FakeClient()
-    with pytest.raises(ContractError): analyze(task, index, client, time.monotonic()-1)
-    with pytest.raises(ContractError): analyze(task, RetrievalIndex({}, task['cutoff_date'], []), client, time.monotonic()+30)
+    with pytest.raises(ContractError): analyze(task, index, client, time.monotonic()-1, strict=True)
+    with pytest.raises(ContractError): analyze(task, RetrievalIndex({}, task['cutoff_date'], []), client, time.monotonic()+30, strict=True)
     assert client.calls == 0
 
 

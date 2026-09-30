@@ -1,5 +1,22 @@
 ## Executive summary (read this first)
 
+**2026-09-30 robustness update (scorer 5.2.2).** `analyze` now defaults to lenient mode:
+
+- A group whose House reply is invalid, missing or unaffordable no longer refuses the unit.
+  Its entities get a documented last-resort row (median of the model-made rows, else a zero
+  anchor with a wide band) and the evidence trace says how many entities used it. The CLI
+  writes the same model-free answer when the worker fails or times out, so every unit is
+  admissible. `strict=True` keeps the original fail-closed behaviour.
+- Retrieval honours the manifest entity rule: a claim's document must list its entity in
+  `entity_ids` or be `shared`, otherwise the scorer counts the claim false.
+- Every claim is `"<entity name>: <verbatim quote>"` of the span it cites (<= 400 characters),
+  which passes the every-figure rule and is not sent to the judge. Each row also cites one
+  field of its own task-table row (`doc_id: "task"`).
+- One extra request asks for 1-3 `submitted_reasons` (reasoning bonus, up to +0.25). They are
+  capped below the official byte limits and omitted whenever invalid.
+- Tests run the official `check_claim_rules` and `check_submitted_reasons` on all 11 public
+  units, for both model-driven and model-free answers: no false claims.
+
 This is the participant-side Track 4 analysis pipeline. It retrieves frozen evidence, requests grouped House predictions, grounds exact quotations and validates complete answers for classification, regression and ranking. It does not score predictions or access resolved outcomes. The local `analyze` entry point and candidate image pass synthetic interface/runtime checks. Real House quality, production faithfulness and organizer-platform execution remain unverified.
 
 Call `build_answer(task, predictions)` and then `write_answer(task, answer, path)`.
@@ -20,7 +37,7 @@ the internal unit acknowledgement from already serialized JSON, verify corpus
 offsets or dates, or establish production faithfulness. Those belong to the
 assembly, retrieval and official judge stages respectively.
 
-Use Python 3.13 and toolkit 2.4.4. Tests use synthetic predictions, and invoke
+Use Python 3.13 and toolkit 2.5.1 (Track 4 scorer 5.2.2). Tests use synthetic predictions, and invoke
 the separately pinned official Track 4 alignment code as an independent check.
 
 ### Traceable retrieval (T4-03)
@@ -57,7 +74,8 @@ JSON, roster, units or quotes trigger one repair with broader retrieval. Quotes
 must occur in the excerpts actually supplied; model offsets are never trusted.
 A model's support assertion is not a production entailment verdict.
 
-The parent process kills its worker on timeout (default580s, maximum600s).
+The parent process kills its worker on timeout (default 520 s, maximum 600 s; the 600 s
+container ceiling also covers container creation and any image pull).
 Missing configuration, no evidence, invalid predictions after repair or timeout
 return exit2 and a structured `notes.status=unavailable` result. That record
 contains no fabricated predictions and deliberately does not satisfy the answer

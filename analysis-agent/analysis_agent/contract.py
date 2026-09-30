@@ -74,6 +74,21 @@ def _task_contract(task):
     return kind, ids, units, labels
 
 
+def task_table(task):
+    """The text a `doc_id: "task"` citation indexes, and each entity row's [start, end).
+
+    Mirrors qfbench2_track_analysis.corpus.task_table_text (scorer 5.2.x): one line per
+    `entities` row in task.json order, `json.dumps(row, ensure_ascii=False,
+    separators=(", ", ": "))`, joined by a single newline."""
+    lines, ranges, offset = [], {}, 0
+    for row in task['entities']:
+        line = json.dumps(row, ensure_ascii=False, separators=(', ', ': '))
+        ranges[row['entity_id']] = (offset, offset + len(line))
+        lines.append(line)
+        offset += len(line) + 1
+    return '\n'.join(lines), ranges
+
+
 def validate_answer(task, answer):
     """Validate structure and task binding, not citation truth or prediction quality."""
     kind, ids, _, labels = _task_contract(task)

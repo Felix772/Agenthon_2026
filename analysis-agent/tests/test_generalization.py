@@ -26,24 +26,40 @@ from qfbench2_track_analysis.scoring import build_smoke_verifier
 
 
 class StructuralModel:
-    """Returns complete grounded rows with intentionally meaningless predictions."""
+    """Returns complete grounded rows with intentionally meaningless predictions.
+
+    Quotes are short exact tails of an excerpt the entity may cite, as the House prompt asks.
+    A reasons request (it carries `predictions`) receives one grounded reason."""
 
     def __init__(self):
         self.calls = 0
+
+    @staticmethod
+    def quote(text):
+        return text[-200:]
 
     def complete(self, messages, deadline):
         self.calls += 1
         assert self.calls <= 25
         request = json.loads(messages[-1]['content'])
-        excerpt_id, excerpt = next(iter(request['excerpts'].items()))
+        if 'predictions' in request:
+            key, excerpt = next(iter(request['excerpts'].items()))
+            ids = [e['entity_id'] for e in request['entities']]
+            return json.dumps({'submitted_reasons': [{
+                'premise': 'Synthetic premise for a structural rehearsal of the reasons field.',
+                'mechanism': 'Synthetic mechanism; no market claim is made.',
+                'answer_implication': 'Synthetic implication for ' + ', '.join(ids[:3]) + '.',
+                'entities': ids[:3],
+                'citations': [{'excerpt_id': key, 'quote': self.quote(excerpt['text'])}]}]})
         rows = []
         for entity in request['entities']:
             unit = entity.get('unit', entity.get('units',
                    request['target'].get('unit', request['target'].get('units'))))
+            key = entity['citable_excerpts'][0]
             row = {'entity_id': entity['entity_id'], 'supported': True,
                    'point_forecast': 0, 'interval': {'level': 0.9, 'lo': -1, 'hi': 1},
-                   'claims': [{'excerpt_id': excerpt_id, 'quote': excerpt['text'],
-                               'claim': 'Synthetic structural rehearsal only.'}]}
+                   'claims': [{'excerpt_id': key,
+                               'quote': self.quote(request['excerpts'][key]['text'])}]}
             if unit is not None:
                 row['unit'] = unit
             if request['target']['type'] == 'classification':
@@ -65,7 +81,16 @@ def test_every_public_unit_structural_smoke(unit, tmp_path):
     client = StructuralModel()
     answer = analyze(task, index, client, time.monotonic() + 60)
     assert len(answer['entity_predictions']) == len(task['entities'])
-    assert client.calls == (len(task['entities']) + 2) // 3 <= 25
+    # One request per group of three, plus one for submitted_reasons.
+    assert client.calls == (len(task['entities']) + 2) // 3 + 1 <= 25
+    assert 1 <= len(answer['submitted_reasons']) <= 3
+    # Scorer 5.2.2 deterministic claim rules, by the official code: no false claim.
+    from baselines.guardrails_example.citation_rail import (
+        check_claim_rules, check_submitted_reasons, load_corpus)
+    findings = [f for f in check_claim_rules(answer, unit, token_counter=None)
+                if f.code != 'claim_tokens_unchecked']
+    assert findings == []
+    assert check_submitted_reasons(answer, load_corpus(unit / 'corpus'), task['cutoff_date']) == []
     output = tmp_path / 'answer.json'
     write_answer(task, answer, output)
     assert output.stat().st_size < 64 * 1024 * 1024
@@ -92,7 +117,7 @@ def test_long_text_and_ranking_ties_keep_exact_offsets():
     client = StructuralModel()
     answer = analyze(task(entities, prompt='Beacon revenue'), index, client,
                      time.monotonic() + 60)
-    assert client.calls == 2
+    assert client.calls == 3  # two groups plus the reasons request
     assert {row['point_forecast'] for row in answer['entity_predictions']} == {0}
     assert align_predictions(answer, EntityRoster.from_task(task(entities)),
                              target_type='ranking', interval_level=0.9).count == 4
@@ -109,9 +134,9 @@ def test_duplicate_roster_and_no_relevance_fail_without_model_calls():
                                            'unrelated passage')}, '2024-01-01', [])
     entities = [{'entity_id': 'X', 'name': 'none'}, {'entity_id': 'X', 'name': 'none'}]
     with pytest.raises(ContractError):
-        analyze(task(entities, prompt='absent'), index, client, time.monotonic() + 10)
+        analyze(task(entities, prompt='absent'), index, client, time.monotonic() + 10, strict=True)
     with pytest.raises(ContractError, match='no relevant'):
-        analyze(task(entities[:1], prompt='absent'), index, client, time.monotonic() + 10)
+        analyze(task(entities[:1], prompt='absent'), index, client, time.monotonic() + 10, strict=True)
     assert client.calls == 0
 
 
@@ -141,7 +166,7 @@ def test_roster_over_request_capacity_is_rejected_before_model_calls():
     client = StructuralModel()
     with pytest.raises(ContractError, match='request capacity'):
         analyze(task(entities, prompt='Beacon revenue'), index, client,
-                time.monotonic() + 10)
+                time.monotonic() + 10, strict=True)
     assert client.calls == 0
 
 
@@ -161,5 +186,5 @@ def test_oversized_house_response_fails_without_a_prediction():
                                            'Beacon revenue evidence.')}, '2024-01-01', [])
     with pytest.raises(module.ModelError, match='2 MB'):
         analyze(task([{'entity_id': 'B', 'name': 'Beacon'}], prompt='Beacon revenue'),
-                index, client, time.monotonic() + 10)
+                index, client, time.monotonic() + 10, strict=True)
     assert client.requests == 1
