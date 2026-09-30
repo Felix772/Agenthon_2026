@@ -2,7 +2,7 @@
 FROM finance-bench-sandbox:latest
 RUN apt-get update && apt-get install -y --no-install-recommends git \
     && rm -rf /var/lib/apt/lists/*
-RUN pip install --no-cache-dir "qfbench2-common @ git+https://github.com/Agenthon-2026/Agenthon2026-public.git@v2.4.3#subdirectory=common"
+RUN pip install --no-cache-dir "qfbench2-common @ git+https://github.com/Agenthon-2026/Agenthon2026-public.git@v2.5.1#subdirectory=common"
 ENV PYTHONPATH=/public PYTHONDONTWRITEBYTECODE=1
 WORKDIR /public
 ENTRYPOINT ["qfbench2"]

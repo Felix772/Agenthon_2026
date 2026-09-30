@@ -1,3 +1,4 @@
+import json
 import math
 import os
 import tomllib
@@ -50,15 +51,35 @@ def read_task(task_dir: Path):
     return Task(root, instruction, sorted(files), float(timeout), canary)
 
 
+def _parquet_preview(path, limit):
+    """Schema, row count and a few rows, so the model sees columns it cannot otherwise read."""
+    try:
+        import pyarrow.parquet as pq
+        meta = pq.ParquetFile(path)
+        head = meta.read_row_group(0).slice(0, 3).to_pylist() if meta.num_row_groups else []
+        text = json.dumps({"schema": [f"{f.name}: {f.type}" for f in meta.schema_arrow],
+                           "num_rows": meta.metadata.num_rows, "head": head},
+                          ensure_ascii=False, default=str)
+    except Exception as exc:  # preview is best effort; the program still inspects the file
+        text = f"unreadable parquet preview: {type(exc).__name__}"
+    return text[:limit]
+
+
 def describe_files(task):
-    descriptions, remaining = [], 16000
+    descriptions, remaining = [], 20000
     for name in task.files[:1000]:
         path = task.root / name
         item = {"path": name, "bytes": path.stat().st_size}
-        if name not in ("instruction.md", "card.toml") and path.suffix.lower() in {".csv", ".json", ".txt", ".md", ".toml"} and remaining > 0:
-            with path.open("rb") as handle:
-                preview = handle.read(min(2000, remaining)).decode("utf-8", errors="replace")
-            item["preview"] = task.redact(preview)
-            remaining -= len(preview.encode("utf-8"))
+        suffix = path.suffix.lower()
+        if name not in ("instruction.md", "card.toml") and remaining > 0:
+            preview = None
+            if suffix in {".csv", ".json", ".txt", ".md", ".toml", ".tsv", ".yaml", ".yml"}:
+                with path.open("rb") as handle:
+                    preview = handle.read(min(2000, remaining)).decode("utf-8", errors="replace")
+            elif suffix in {".parquet", ".pq"}:
+                preview = _parquet_preview(path, min(2000, remaining))
+            if preview is not None:
+                item["preview"] = task.redact(preview)
+                remaining -= len(preview.encode("utf-8"))
         descriptions.append(item)
     return descriptions

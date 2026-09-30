@@ -155,7 +155,13 @@ tests/
 The card's `[agent].timeout_sec` sets the overall deadline; no universal 1800-second timeout
 is assumed. A watchdog bounds the whole solve even if a model server trickles bytes. Each
 execution gets at most 40% of the task budget and must fit within the remaining time.
-Default is three generate/execute attempts, configurable with AGENT_MAX_ATTEMPTS (1–5).
+Default is up to six generate/execute attempts, configurable with AGENT_MAX_ATTEMPTS (1–12).
+The unit's working deadline is the smaller of the card's `timeout_sec` and AGENT_UNIT_BUDGET_SEC
+(default 420 s): the Development ingestion stage is one 12-hour clock for the roster, about
+8 minutes per unit, and units not reached score 0 (Track 1 README rules 3 and 5).
+After the first clean run, AGENT_REVIEW_ROUNDS (default 1, 0–3) review rounds show the model
+previews of its deliverables; a revision is adopted only if it executes and validates, so a
+review never removes a working answer. Parquet inputs are previewed (schema, rows, head).
 Each model request gets at most one retry for transient network/429/5xx failures. The client
 tracks cumulative tokens or reservations as evidence, with no per-unit token cap,
 and allows at most 25 sends (including retries) and 4,000 output tokens per call. Explicit 401/403
@@ -219,7 +225,7 @@ To recreate it on Windows with Python 3.13 installed:
 ```powershell
 Set-Location ../track1-coding-public
 & "$env:LOCALAPPDATA\Programs\Python\Python313\python.exe" -m venv .venv
-.\.venv\Scripts\python.exe -m pip install "qfbench2-common @ git+https://github.com/Agenthon-2026/Agenthon2026-public.git@v2.4.3#subdirectory=common"
+.\.venv\Scripts\python.exe -m pip install "qfbench2-common @ git+https://github.com/Agenthon-2026/Agenthon2026-public.git@v2.5.1#subdirectory=common"
 .\.venv\Scripts\python.exe -m pip install -e .
 .\.venv\Scripts\qfbench2.exe --help
 ```
