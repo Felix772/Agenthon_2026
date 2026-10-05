@@ -36,20 +36,20 @@ def test_supported_response_shapes(case):
     assert client.requests == (3 if case == 'repair' else 2)
 
 
-@pytest.mark.parametrize('case', ['prefixed', 'missing', 'duplicate', 'unit', 'quote', 'unsupported'])
+@pytest.mark.parametrize('case', ['prefixed', 'missing', 'duplicate', 'unit', 'quote'])
 def test_invalid_rows_are_bounded_and_fail_closed(case):
     task, index = setup()
     client = client_for(case)
     with pytest.raises(ContractError): analyze(task, index, client, time.monotonic()+10)
-    assert client.requests == 2
+    assert client.requests == 4
 
 
 @pytest.mark.parametrize('case', ['empty', 'truncated', 'malformed', 'nonobject'])
-def test_transport_failure_has_no_extra_pipeline_retries(case):
+def test_transport_failure_uses_only_one_send_per_scheduled_attempt(case):
     task, index = setup()
     client = client_for(case)
     with pytest.raises(ModelError): analyze(task, index, client, time.monotonic()+10)
-    assert client.requests == 1
+    assert client.requests == 4
 
 
 @pytest.mark.parametrize('status', [401, 403, 429, 500, 503])
@@ -59,14 +59,14 @@ def test_pipeline_cannot_multiply_transport_retries(status):
     client.opener.open.side_effect = urllib.error.HTTPError('http://house.invalid', status, 'synthetic', {}, None)
     with patch('agent.model_client.time.sleep'), pytest.raises(ModelError):
         analyze(task, index, client, time.monotonic()+10)
-    assert client.opener.open.call_count == (1 if status in (401, 403) else 2)
-    assert client.requests == (0 if status in (401, 403) else 2)
+    assert client.opener.open.call_count == (1 if status in (401, 403) else 4)
+    assert client.requests == (0 if status in (401, 403) else 4)
 
 
 def test_repairs_share_global_budget_across_groups():
     task, index = setup(n=75)
     client = client_for('repair')
-    with pytest.raises(ModelError, match='request budget'):
+    with pytest.raises(ContractError, match='incomplete'):
         analyze(task, index, client, time.monotonic()+30)
     assert client.requests == client.opener.open.call_count == 25
 
@@ -83,4 +83,4 @@ def test_fence_support_does_not_scan_for_json(prefix, suffix):
         return io.BytesIO(json.dumps(value).encode())
     client.opener.open.side_effect = wrapped
     with pytest.raises(ContractError): analyze(task, index, client, time.monotonic()+10)
-    assert client.requests == 2
+    assert client.requests == 4

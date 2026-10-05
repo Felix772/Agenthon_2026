@@ -1,0 +1,67 @@
+[
+  {
+    "name": "required_heading",
+    "instruction": "## Required Outputs\n- `result.csv`\n",
+    "required": ["result.csv"]
+  },
+  {
+    "name": "submission_file_heading",
+    "instruction": "## Submission\n### File 1: `result.csv`\n",
+    "required": ["result.csv"]
+  },
+  {
+    "name": "submission_example_section",
+    "instruction": "## Submission Example\n### File 1: `sample.csv`\n## Required Outputs\n### File 1: `result.csv`\n",
+    "required": ["result.csv"]
+  },
+  {
+    "name": "outputs_not_required_section",
+    "instruction": "## Outputs not required\n### File 1: `debug.csv`\n## Required Outputs\n### File 1: `result.csv`\n",
+    "required": ["result.csv"]
+  },
+  {
+    "name": "input_reference_section",
+    "instruction": "## Input Files\n### File 1: `prices.csv`\n## Outputs\n- `result.csv`\n",
+    "required": ["result.csv"]
+  },
+  {
+    "name": "optional_output_line",
+    "instruction": "## Outputs\n- `debug.csv` (optional)\n- `result.csv`\n",
+    "required": ["result.csv"]
+  },
+  {
+    "name": "explicit_write_and_prose",
+    "instruction": "Read input.json. Write result.json. For example, example.json is a reference.\n",
+    "required": ["result.json"]
+  },
+  {
+    "name": "optional_second_file_same_sentence",
+    "instruction": "Write result.json and optional debug.json.\n",
+    "required": ["result.json"]
+  },
+  {
+    "name": "example_second_file_same_sentence",
+    "instruction": "Write result.json, for example, example.json is a reference.\n",
+    "required": ["result.json"]
+  },
+  {
+    "name": "abbreviated_example_second_file",
+    "instruction": "Write result.json, e.g., example.json is a reference.\n",
+    "required": ["result.json"]
+  },
+  {
+    "name": "step_save_outputs",
+    "instruction": "### Step 4: Save Outputs\n#### 1. `summary.json`\n### Step 5: Review inputs\n#### 1. `returns.csv`\n",
+    "required": ["summary.json"]
+  },
+  {
+    "name": "file_and_artifact_labels",
+    "instruction": "## Deliverables\n### File 1: `alpha.csv`\n### Artifact 2: `beta.json`\n",
+    "required": ["alpha.csv", "beta.json"]
+  },
+  {
+    "name": "negation_under_output_heading",
+    "instruction": "## Outputs\nDo not write reward.json.\nWrite result.json.\n",
+    "required": ["result.json"]
+  }
+]

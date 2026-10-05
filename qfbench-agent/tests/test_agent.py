@@ -66,6 +66,18 @@ class ReaderAndClientTests(unittest.TestCase):
             with self.assertRaises((ValueError, SyntaxError)):
                 parse_solution(text)
 
+    def test_single_complete_json_fence_variants(self):
+        payload = json.dumps({"code": "print(1)", "deliverables": ["results.json"]})
+        for response in (f"```json\r\n{payload}\r\n```", f"```JSON\n{payload}\n```",
+                         f"```\n{payload}\n```"):
+            with self.subTest(response=response[:12]):
+                self.assertEqual(parse_solution(response)["deliverables"], ["results.json"])
+        for response in (f"reasoning\n```json\n{payload}\n```",
+                         f"```json\n{payload}\n```\nextra",
+                         f"```json\n{payload}\n```\n```json\n{payload}\n```"):
+            with self.subTest(response=response[:20]), self.assertRaises(ValueError):
+                parse_solution(response)
+
     def test_client_retry_and_environment_contract(self):
         with mock_model([(429, {}), "solution"]) as (url, requests):
             client = ModelClient(url, "test-model")
@@ -207,8 +219,11 @@ class ExecutionTests(unittest.TestCase):
             env = {k: v for k, v in os.environ.items() if k not in ("MODEL_ENDPOINT", "MODEL_NAME")}
             result = subprocess.run([sys.executable, "-m", "agent", "solve", "--task-dir", str(root / "task"), "--out", str(root / "out")], env=env, capture_output=True, text=True)
             self.assertNotEqual(result.returncode, 0)
-            self.assertIn("MODEL_ENDPOINT", result.stderr)
-            self.assertFalse((root / "out").exists())
+            self.assertIn('"event": "agent_failed"', result.stderr)
+            report = json.loads((root / "out/.agent/run.json").read_text())
+            self.assertEqual(report["stage"], "client")
+            self.assertEqual(report["status"], "failed")
+            self.assertEqual([path.name for path in (root / "out").iterdir()], [".agent"])
 
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@ sys.path.insert(0, str(ROOT / 'analysis-agent'))
 from analysis_agent import ContractError
 from analysis_agent.retrieval import RetrievalIndex, canonical_text
 from qfbench2_common.scoring.faithfulness import _doc_text
+from conftest import T4_UNITS
 
 
 def corpus(tmp_path, docs):
@@ -113,7 +114,7 @@ def test_symlink_document_refused(tmp_path):
 
 
 def test_current_public_corpora_against_official_text():
-    for unit in sorted((ROOT / '.validation/track4-20260923/units').iterdir()):
+    for unit in sorted(T4_UNITS.iterdir()):
         task_path = unit / 'task.json'
         if not task_path.exists(): continue
         task = json.loads(task_path.read_text(encoding='utf-8'))

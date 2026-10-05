@@ -1,1 +1,1 @@
-qfbench2-common @ git+https://github.com/Agenthon-2026/Agenthon2026-public.git@v2.4.4#subdirectory=common
+qfbench2-common @ git+https://github.com/Agenthon-2026/Agenthon2026-public.git@v2.5.0#subdirectory=common

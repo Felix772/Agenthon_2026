@@ -20,8 +20,14 @@ the internal unit acknowledgement from already serialized JSON, verify corpus
 offsets or dates, or establish production faithfulness. Those belong to the
 assembly, retrieval and official judge stages respectively.
 
-Use Python 3.13 and toolkit 2.4.4. Tests use synthetic predictions, and invoke
-the separately pinned official Track 4 alignment code as an independent check.
+Use Python 3.13 and toolkit 2.5.1 for Track 4 scorer 5.2.2. Tests use synthetic
+predictions and an external pinned evaluator; set `QFBENCH_T4_SOURCE` to its source
+directory and, if stored separately, `QFBENCH_T4_UNITS` to its LF-preserving units.
+The old September 23 evaluator is not a substitute for the current contract.
+The current test default is the LF-preserving snapshot at
+`.validation/t4-e2-scorer-5.2.2-20261001` in the workspace root.
+`build_answer(..., submitted_reasons=...)` accepts the optional 1–3 reason block
+and validates it with the current official schema. Omitting it remains valid.
 
 ### Traceable retrieval (T4-03)
 
@@ -40,6 +46,17 @@ one. No match returns no hits, and missing evidence remains a downstream failure
 to handle rather than a fabricated citation. Matching words or quotes does not
 establish support for a prediction; production faithfulness still needs the judge.
 
+The index retains citation ownership from the trusted manifest. Pipeline search
+and final quotation grounding both require the citing entity to appear in the
+document's `entity_ids`, or the document to be marked `shared: true`. Missing and
+empty ownership lists grant no citation permission; document-body metadata does
+not override the manifest. Unfiltered `search` remains available for offline
+retrieval comparisons and is not used by the prediction pipeline.
+
+Scorer 5.2.0 applies false-claim penalties and an optional reasoning bonus. The
+old 80% prediction-entailment admission rule is not the current scoring contract.
+Schema and manifest checks do not verify neural contradiction or reason quality.
+
 The reader assumes the organizer's read-only input mount. It rejects existing
 symlinks/junctions and uses no-follow file opens where available; it is not a
 general sandbox for concurrently mutated, hostile directory trees.
@@ -51,19 +68,78 @@ The worker loads the existing `../qfbench-agent/agent/model_client.py` transport
 That workspace dependency must be explicitly bundled when an image is built.
 Configure only organizer-provided MODEL_ENDPOINT, MODEL_NAME and MODEL_TOKEN.
 
-Three entities share each prompt. The shared client enforces25 requests and4000
-output tokens per call, including conservative retry accounting. Invalid model
-JSON, roster, units or quotes trigger one repair with broader retrieval. Quotes
-must occur in the excerpts actually supplied; model offsets are never trusted.
-A model's support assertion is not a production entailment verdict.
+Three entities share each initial prompt. Each call uses exactly one transport
+attempt; initial calls cover all groups before one targeted repair per group.
+Valid rows are retained, and only unresolved rows enter repair prompts. The
+shared actual-send ledger caps all calls at 25, including refusals and retries;
+each response is capped at 4,000 output tokens. The legacy `supported` flag is
+ignored. A claim is a relevant exact quote, capped conservatively at 350 UTF-8
+bytes, and its entity ownership is rechecked. Model offsets are never trusted.
+The production judge's token count is an external check, not a local guarantee.
 
-The parent process kills its worker on timeout (default580s, maximum600s).
-Missing configuration, no evidence, invalid predictions after repair or timeout
-return exit2 and a structured `notes.status=unavailable` result. That record
+`fallback.py` recognizes two explicit historical table structures: bid-to-cover
+ratio histories owned by one entity, and CPI MoM-percent tables with an exact
+entity-name column. It uses the median of the latest three values and the observed
+rolling-median residual range for a nominal 90% band. This short-history band has
+no coverage guarantee and is an emergency estimate, not a measured quality gain.
+On current public inputs this provides 18 rows across 2 of 11 complete units.
+Other shapes, including classification, have no deterministic fallback. The
+adapters use target semantics, units, and actual data; they contain no unit IDs,
+entity-specific answers, resolved labels, or future observations.
+
+A complete input-derived answer is saved atomically before House enhancement.
+Each subsequent complete answer is checkpointed; valid model rows replace their
+fallbacks. A missing or permanently failing House route can preserve a supported
+baseline. Without enough evidence for every row, failure remains explicit.
+
+The parent process kills its worker on timeout (default 580s, maximum 600s).
+At the normal timeout, model work ends 25 seconds early for final validation and
+writing. The parent revalidates a complete checkpoint, including corpus integrity
+and exact entity-bound citations, before preserving it after a worker failure or
+timeout; a slow response cannot replace it with an unavailable record. When no
+complete validated answer exists, failure returns exit 2 and a structured
+`notes.status=unavailable` result. That record
 contains no fabricated predictions and deliberately does not satisfy the answer
 schema; it is never admissible. Only a complete validated answer returns exit0.
 Raw exceptions and model responses are not logged. Live quality remains blocked
 until House access and the official production judge are available.
+
+### Local exit-2 investigation (T4-E2-v1)
+
+The local E2 candidate accepts a single complete CRLF JSON fence and, when sends
+are scarce, fills missing rows before spending calls on complete history rows.
+It adds opt-in stage and count diagnostics without model text or entity IDs.
+Unsupported or ungrounded answers still fail closed. The paired frozen permfix
+and E2 runs cover 43 common fault cases, 11 public shapes, external scorer 5.2.2
+smoke, and the existing cross-UID output gate. The candidate also exercises the
+preexisting optional-reasons rollback. Linux tests pass 191/191.
+See [evidence and source boundaries](../project-evidence/t14-experiments/T4-E2-v1/README.md).
+These synthetic checks do not identify the seven official exit-2 causes; no
+configured House credentials were available and the candidate remains local.
+
+### Optional submitted reasons (A3, disabled by default)
+
+Pass `--reasons` to the CLI, or `enable_reasons=True` to `analyze`, to opt in.
+Candidate v1 does not select this feature. Once all predictions are fixed and a
+complete answer is saved, the agent may spend one remaining actual send on 1–3
+reasons. It never changes prediction rows during this step. It first supplies the
+actual cited facts and then broader retrieved context, with at most 32,000 bytes
+of excerpt text. Task values needed for the explanation must appear in its premise.
+
+The separate `reasons.py` module grounds model quotes back to corpus offsets and
+checks the current schema, named entities, ownership, dates, normalized duplicate
+content, deny list, URI masking, and compact UTF-8 size limits. Empty prose and
+uncited reasons are also rejected. It keeps a 10% margin when checking whether
+the projected answer is small enough to start the optional request. A failure,
+insufficient budget/time, or oversized answer leaves the saved base unchanged;
+the whole optional block is omitted. Opt-in diagnostics record only an allowlisted
+reason status. A permanently unavailable route does not receive an optional retry.
+
+External tests compare these deterministic checks with the official
+`check_submitted_reasons` helper from the pinned evaluator. Neither these checks
+nor synthetic reasons establish factual entailment, causal strength, or agreement
+between free-form prose and numeric predictions. Those quality properties remain
+subject to independent review and the official reasoning judge.
 
 ### Local candidate image
 

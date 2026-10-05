@@ -67,6 +67,12 @@ class Document:
     doc_date: str
     sha256: str
     text: str
+    entity_ids: tuple[str, ...] | None = None
+    shared: bool = False
+
+    def admits(self, entity_id):
+        """Only the trusted manifest can grant an entity permission to cite a document."""
+        return self.shared or (self.entity_ids is not None and entity_id in self.entity_ids)
 
 
 @dataclass(frozen=True)
@@ -132,6 +138,19 @@ class RetrievalIndex:
             digest = entry.get('sha256')
             if not isinstance(digest, str) or not re.fullmatch('[0-9a-f]{64}', digest):
                 raise ContractError('invalid manifest digest')
+            entity_ids = entry.get('entity_ids')
+            if entity_ids is not None:
+                if (not isinstance(entity_ids, list)
+                        or not all(isinstance(eid, str) and eid for eid in entity_ids)
+                        or len(entity_ids) != len(set(entity_ids))):
+                    raise ContractError('invalid manifest entity ownership')
+                entity_ids = tuple(entity_ids)
+            raw_shared = entry.get('shared')
+            if raw_shared is not None and raw_shared is not True:
+                raise ContractError('manifest shared flag must be true when present')
+            shared = raw_shared is True
+            if shared and entity_ids:
+                raise ContractError('manifest document is both shared and entity-labelled')
             payload = _read(corpus / (doc_id + '.json'))
             if hashlib.sha256(payload).hexdigest() != digest:
                 raise ContractError('corpus digest mismatch')
@@ -146,17 +165,22 @@ class RetrievalIndex:
             if doc_date > limit:
                 excluded.append((doc_id, 'post_cutoff'))
                 continue
-            documents[doc_id] = Document(doc_id, doc['doc_date'], digest, canonical_text(doc))
+            documents[doc_id] = Document(doc_id, doc['doc_date'], digest, canonical_text(doc),
+                                         entity_ids=entity_ids, shared=shared)
         if not seen:
             raise ContractError('manifest declares no citable documents')
         return cls(documents, cutoff, excluded, **chunk_options)
 
-    def search(self, query, *, top_k=5):
+    def search(self, query, *, top_k=5, entity_id=None):
         if not isinstance(query, str) or type(top_k) is not int or top_k < 0:
             raise ContractError('invalid query or top_k')
+        if entity_id is not None and (not isinstance(entity_id, str) or not entity_id):
+            raise ContractError('invalid retrieval entity')
         terms = set(tokens(query))
         results = []
         for passage, count, length in zip(self.passages, self._counts, self._lengths):
+            if entity_id is not None and not self.documents[passage.doc_id].admits(entity_id):
+                continue
             score = 0.0
             for term in sorted(terms):
                 frequency = count[term]
@@ -168,10 +192,12 @@ class RetrievalIndex:
         results.sort(key=lambda h: (-h.score, h.passage.doc_id, h.passage.span_start))
         return results[:top_k]
 
-    def validate_span(self, doc_id, start, end, *, quote=None):
+    def validate_span(self, doc_id, start, end, *, quote=None, entity_id=None):
         doc = self.documents.get(doc_id) if isinstance(doc_id, str) else None
         if doc is None or calendar_date(doc.doc_date) > self.cutoff:
             raise ContractError('citation document unavailable or embargoed')
+        if entity_id is not None and not doc.admits(entity_id):
+            raise ContractError('citation document does not belong to entity')
         if type(start) is not int or type(end) is not int or not 0 <= start < end <= len(doc.text):
             raise ContractError('citation offsets out of bounds')
         actual = doc.text[start:end]
@@ -179,14 +205,14 @@ class RetrievalIndex:
             raise ContractError('citation quote differs from original text')
         return actual
 
-    def ground_quote(self, doc_id, quote, *, within=None):
+    def ground_quote(self, doc_id, quote, *, within=None, entity_id=None):
         if not isinstance(quote, str) or not quote:
             raise ContractError('empty quote')
         doc = self.documents.get(doc_id)
         if doc is None:
             raise ContractError('unknown document')
         start, end = within if within is not None else (0, len(doc.text))
-        self.validate_span(doc_id, start, end)
+        self.validate_span(doc_id, start, end, entity_id=entity_id)
         found = doc.text.find(quote, start, end)
         if found < 0:
             raise ContractError('quote not found verbatim')

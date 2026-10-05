@@ -80,6 +80,8 @@ def validate_answer(task, answer):
     _finite_tree(answer)
     schema = json.loads((importlib.resources.files('qfbench2_common') /
                          'schemas/analysis.schema.json').read_text(encoding='utf-8'))
+    _require('submitted_reasons' in schema.get('properties', {}),
+             'toolkit schema predates the Track 4 5.2 contract; install pinned v2.5.0')
     errors = list(Draft202012Validator(schema).iter_errors(answer))
     _require(not errors, 'answer violates official analysis schema')
     _require(answer['task_id'] == task['task_id'], 'task_id mismatch')
@@ -112,7 +114,7 @@ def validate_answer(task, answer):
     return answer
 
 
-def build_answer(task, predictions, *, evidence_trace=''):
+def build_answer(task, predictions, *, evidence_trace='', submitted_reasons=None):
     """Accept internal rows with explicit numeric units, emit official fields in roster order.
 
     Internal `unit`/`units` acknowledges the task unit for the point and both bounds.
@@ -135,6 +137,8 @@ def build_answer(task, predictions, *, evidence_trace=''):
     _require(set(by_id) == set(ids), 'missing prediction entity')
     answer = {'task_id': task['task_id'], 'schema_version': '3', 'target_type': kind,
               'entity_predictions': [by_id[eid] for eid in ids], 'evidence_trace': evidence_trace}
+    if submitted_reasons is not None:
+        answer['submitted_reasons'] = deepcopy(submitted_reasons)
     return validate_answer(task, answer)
 
 
@@ -150,6 +154,8 @@ def write_answer(task, answer, path):
                                          prefix='.answer-', delete=False) as stream:
             temporary = Path(stream.name)
             stream.write(data)
+        # The organizer checks /output as another uid; NamedTemporaryFile starts at 0600.
+        os.chmod(temporary, 0o644)
         os.replace(temporary, path)
     finally:
         if temporary is not None:

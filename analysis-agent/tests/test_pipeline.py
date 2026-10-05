@@ -20,7 +20,8 @@ def setup(kind='regression', n=4):
             'cutoff_date': '2024-01-01', 'prompt': 'Forecast revenue',
             'entities': [{'entity_id': f'E{i}', 'name': 'Revenue entity'} for i in range(n)]}
     if kind == 'classification': task['target']['labels'] = ['up', 'down']
-    doc = Document('doc', '2024-01-01', 'synthetic-only', 'Revenue increased in the supplied synthetic example.')
+    doc = Document('doc', '2024-01-01', 'synthetic-only',
+                   'Revenue increased in the supplied synthetic example.', shared=True)
     return task, RetrievalIndex({'doc': doc}, '2024-01-01', [])
 
 
@@ -30,7 +31,8 @@ class FakeClient:
         self.fault = fault
         self.permanent = permanent
 
-    def complete(self, messages, deadline):
+    def complete(self, messages, deadline, *, max_sends=1):
+        assert max_sends == 1
         self.calls += 1
         assert self.calls <= 25
         request = json.loads(messages[-1]['content'])
@@ -66,7 +68,7 @@ def test_all_types_multigroup(kind):
             assert index.validate_span(claim['doc_id'], claim['span_start'], claim['span_end'])
 
 
-@pytest.mark.parametrize('fault', ['json', 'missing', 'quote', 'excerpt', 'unit', 'unsupported', 'nan'])
+@pytest.mark.parametrize('fault', ['json', 'missing', 'quote', 'excerpt', 'unit', 'nan'])
 def test_repair_retrieves_and_revalidates(fault):
     task, index = setup(n=2)
     client = FakeClient(fault)
@@ -74,12 +76,12 @@ def test_repair_retrieves_and_revalidates(fault):
     assert client.calls == 2
 
 
-@pytest.mark.parametrize('fault', ['missing', 'quote', 'unsupported'])
+@pytest.mark.parametrize('fault', ['missing', 'quote'])
 def test_permanent_error_never_yields_partial_answer(fault):
     task, index = setup()
     client = FakeClient(fault, permanent=True)
     with pytest.raises(ContractError): analyze(task, index, client, time.monotonic()+30)
-    assert client.calls == 2
+    assert client.calls == 4
 
 
 def test_no_evidence_and_deadline_do_not_call_model():

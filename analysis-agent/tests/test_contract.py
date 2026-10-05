@@ -1,13 +1,15 @@
 from copy import deepcopy
 import json
+import os
 from pathlib import Path
+import stat
 import sys
 
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'analysis-agent'))
-sys.path.insert(0, str(ROOT / '.validation/track4-20260923'))
+from conftest import T4_UNITS
 from analysis_agent import ContractError, build_answer, validate_answer, write_answer
 from qfbench2_track_analysis.alignment import EntityRoster, align_predictions
 
@@ -46,6 +48,19 @@ def test_roundtrip_and_official_alignment(kind, tmp_path):
     write_answer(task, answer, path)
     assert json.loads(path.read_text(encoding='utf-8')) == answer
     assert list(tmp_path.iterdir()) == [path]
+
+
+@pytest.mark.skipif(os.name != 'posix', reason='POSIX output mode contract')
+def test_atomic_answer_is_readable_by_checker_uid_under_restrictive_umask(tmp_path):
+    task, rows = fixture()
+    answer = build_answer(task, rows)
+    path = tmp_path / 'answer.json'
+    previous = os.umask(0o077)
+    try:
+        write_answer(task, answer, path)
+    finally:
+        os.umask(previous)
+    assert stat.S_IMODE(path.stat().st_mode) == 0o644
 
 
 @pytest.mark.parametrize('bad', ['missing', 'duplicate', 'extra', 'unit', 'missing_unit',
@@ -132,7 +147,7 @@ def test_bad_binding_preserves_output(field, value, tmp_path):
 
 
 def test_all_public_task_shapes_without_outcomes():
-    paths = sorted((ROOT / '.validation/track4-20260923/units').glob('*/task.json'))
+    paths = sorted(T4_UNITS.glob('*/task.json'))
     assert paths
     for path in paths:
         task = json.loads(path.read_text(encoding='utf-8'))
@@ -148,3 +163,26 @@ def test_all_public_task_shapes_without_outcomes():
             rows.append(row)
         answer = build_answer(task, rows)
         assert align_predictions(answer, EntityRoster.from_task(task), target_type=kind, interval_level=0.9).count == len(rows)
+
+
+def reason():
+    return {'reason_id': 'r1', 'premise': 'The source describes revenue growth.',
+            'mechanism': 'Higher revenue raises earnings when costs are stable.',
+            'answer_implication': 'This supports a higher forecast for A and B.'}
+
+
+def test_optional_reasons_are_schema_checked_and_copied():
+    task, rows = fixture()
+    assert 'submitted_reasons' not in build_answer(task, rows)
+    reasons = [reason()]
+    answer = build_answer(task, rows, submitted_reasons=reasons)
+    reasons[0]['mechanism'] = 'changed after validation'
+    assert answer['submitted_reasons'][0]['mechanism'] != reasons[0]['mechanism']
+
+
+@pytest.mark.parametrize('bad', [[], [reason()] * 4, [{'reason_id': 'r1'}],
+                               [{**reason(), 'mechanism': 1}]])
+def test_invalid_optional_reasons_cannot_enter_answer(bad):
+    task, rows = fixture()
+    with pytest.raises(ContractError):
+        build_answer(task, rows, submitted_reasons=bad)

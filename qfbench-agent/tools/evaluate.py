@@ -16,7 +16,7 @@ import tomllib
 import uuid
 
 EXCLUDED = {"checks", "reference", "reference_data", "solution", ".git", ".venv", "__pycache__"}
-MODEL_ENV = ("MODEL_ENDPOINT", "MODEL_NAME", "MODEL_TOKEN", "HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY", "http_proxy", "https_proxy", "no_proxy", "QFBENCH_NETWORK", "QFBENCH_SEED", "AGENT_MAX_ATTEMPTS")
+MODEL_ENV = ("MODEL_ENDPOINT", "MODEL_NAME", "MODEL_TOKEN", "HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY", "http_proxy", "https_proxy", "no_proxy", "QFBENCH_NETWORK", "QFBENCH_SEED", "AGENT_MAX_ATTEMPTS", "AGENT_SOFT_TIMEOUT_SEC")
 
 
 def runtime_flags(cpus, memory):
@@ -49,16 +49,50 @@ def mount(source, target, readonly=False):
 
 def run_container(command, name, timeout, log):
     started = time.monotonic()
+    evidence = {"status": "launching", "timeout_sec": timeout, "outer_watchdog": True}
+    status_file = log.with_suffix(".status.json")
+    status_file.write_text(json.dumps(evidence, indent=2), encoding="utf-8")
     with log.open("w", encoding="utf-8") as handle:
         try:
             result = subprocess.run(command, stdout=handle, stderr=subprocess.STDOUT, timeout=timeout)
-            return {"exit_code": result.returncode, "timed_out": False, "elapsed_sec": round(time.monotonic() - started, 3)}
+            evidence.update(status="exited", exit_code=result.returncode, timed_out=result.returncode == 124)
         except subprocess.TimeoutExpired:
-            return {"exit_code": 124, "timed_out": True, "elapsed_sec": round(time.monotonic() - started, 3)}
+            evidence.update(status="outer_timeout", exit_code=124, timed_out=True)
+        except OSError as exc:
+            evidence.update(status="launch_failed", exit_code=None, timed_out=False, error_type=type(exc).__name__)
         finally:
+            evidence["elapsed_sec"] = round(time.monotonic() - started, 3)
+            status_file.write_text(json.dumps(evidence, indent=2), encoding="utf-8")
             # A timeout kills docker.exe, not necessarily the container. Always
             # remove just this run's uniquely named container as well.
-            subprocess.run(["docker", "rm", "-f", name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=30)
+            try:
+                subprocess.run(["docker", "rm", "-f", name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=30)
+            except (OSError, subprocess.TimeoutExpired) as exc:
+                evidence["cleanup_error_type"] = type(exc).__name__
+            evidence["including_cleanup_sec"] = round(time.monotonic() - started, 3)
+            status_file.write_text(json.dumps(evidence, indent=2), encoding="utf-8")
+    return evidence
+
+
+def budget_worksheet(units, soft_timeout=360):
+    if not math.isfinite(soft_timeout) or soft_timeout <= 0:
+        raise ValueError("Soft timeout must be positive and finite")
+    rows = []
+    for unit in units:
+        card = tomllib.loads((unit / "card.toml").read_text(encoding="utf-8"))
+        timeout = float(card["agent"]["timeout_sec"])
+        if not math.isfinite(timeout) or timeout <= 0:
+            raise ValueError("Invalid task timeout")
+        rows.append({"task": unit.name, "card_timeout_sec": timeout, "solve_cap_sec": min(soft_timeout, timeout)})
+    total = sum(row["solve_cap_sec"] for row in rows)
+    return {"units": rows, "solve_cap_sum_sec": total, "internal_solve_target_sec": 34560,
+            "within_internal_solve_target": total <= 34560, "ingestion_limit_sec": 43200,
+            "cap_enforcement": "CLI parent-process watchdog; child card timer and 15s publication reserve at 360s",
+            "parent_reaping_grace_sec_per_unit": 2,
+            "max_roster_reaping_grace_sec": 2 * len(rows),
+            "setup_pull_ingestion_overhead_sec": None, "safety_reserve_sec": None,
+            "release_gate": "observed solve sum + measured setup/pull/ingestion overhead + safety reserve <= 43200",
+            "release_gate_status": "unmeasured; worksheet is not a runtime validation"}
 
 
 def stage_input(unit, destination):
@@ -121,6 +155,9 @@ def main():
                 "model": os.environ["MODEL_NAME"], "selected_tasks": len(units), "attempts_per_task": 1,
                 "public_commit": subprocess.check_output(["git", "-c", f"safe.directory={public.as_posix()}", "-C", str(public), "rev-parse", "HEAD"], text=True).strip()}
     (results / "environment.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+    roster = sorted(p for p in units_root.iterdir() if p.is_dir() and (p / "card.toml").is_file())
+    worksheet = budget_worksheet(roster, float(os.environ.get("AGENT_SOFT_TIMEOUT_SEC", "360")))
+    (results / "budget-worksheet.json").write_text(json.dumps(worksheet, indent=2), encoding="utf-8")
     records = []
     for index, unit in enumerate(units):
         run = results / unit.name
@@ -129,6 +166,7 @@ def main():
         output.mkdir()
         output.chmod(0o777)
         record = {"task": unit.name, "passed": False}
+        ingestion_started = time.monotonic()
         try:
             card = tomllib.loads((unit / "card.toml").read_text(encoding="utf-8"))
             timeout = float(card["agent"]["timeout_sec"])
@@ -143,7 +181,9 @@ def main():
                     command += ["-e", key]
             command += mount(run / "input", "/input", True) + mount(output, "/app/output") + mount(output, "/output")
             command += [image_info["Id"], "solve", "--task-dir", "/input", "--out", "/app/output"]
-            record["agent"] = run_container(command, name, timeout + 15, run / "agent.log")
+            local_ceiling = min(timeout, float(os.environ.get("AGENT_SOFT_TIMEOUT_SEC", "360"))) + 15
+            record["agent"] = run_container(command, name, local_ceiling, run / "agent.log")
+            record["local_ingestion_sec"] = round(time.monotonic() - ingestion_started, 3)
             record["output_bytes"] = output_tree_size(output)
             if record["agent"]["exit_code"] == 0:
                 name = "qfverify-" + uuid.uuid4().hex[:12]
@@ -162,16 +202,29 @@ def main():
                     record["environment_error"] = "Verifier did not produce a structured verdict; see verifier.log"
             agent_report = output / ".agent/run.json"
             if agent_report.exists():
-                record["model_usage"] = json.loads(agent_report.read_text())["model_usage"]
+                diagnostics = json.loads(agent_report.read_text(encoding="utf-8"))
+                record["model_usage"] = diagnostics.get("model_usage")
+                record["agent_diagnostics"] = {key: diagnostics.get(key) for key in ("status", "stage", "failure_category", "attempts", "events", "transport")}
         except Exception as exc:
-            record["environment_error"] = str(exc)
+            record["environment_error"] = type(exc).__name__
+        # Preserve the last agent stage even when output validation failed.
+        if "agent_diagnostics" not in record and (output / ".agent/run.json").is_file():
+            try:
+                diagnostics = json.loads((output / ".agent/run.json").read_text(encoding="utf-8"))
+                record["model_usage"] = diagnostics.get("model_usage")
+                record["agent_diagnostics"] = {key: diagnostics.get(key) for key in ("status", "stage", "failure_category", "attempts", "events", "transport")}
+            except (ValueError, OSError):
+                record["agent_report_unreadable"] = True
         records.append(record)
         with (results / "results.jsonl").open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(record) + "\n")
         print(f"[{index + 1}/{len(units)}] {unit.name}: {'PASS' if record['passed'] else 'FAIL'}", flush=True)
     passed = sum(r["passed"] for r in records)
     summary = {"tasks": len(records), "passed": passed, "one_run_pass_rate": passed / len(records) if records else 0,
-               "environment_failures": sum(bool(r.get("environment_error")) for r in records), "results": str(results)}
+               "environment_failures": sum(bool(r.get("environment_error")) for r in records), "results": str(results),
+               "timed_out": sum(bool(r.get("agent", {}).get("timed_out")) for r in records), "not_reached": 0,
+               "observed_local_ingestion_sec": sum(r.get("local_ingestion_sec", 0) for r in records),
+               "timing_scope": "Local agent staging/launch/execution/cleanup only; no claim about organizer setup/pull overhead"}
     (results / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     print(json.dumps(summary, indent=2))
     return 0 if passed == len(records) and records else 1
