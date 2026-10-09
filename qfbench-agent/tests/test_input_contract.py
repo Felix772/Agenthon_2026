@@ -130,6 +130,35 @@ class InputContractTests(unittest.TestCase):
             self.assertNotIn("hidden", json.dumps(items))
             self.assertIn("not full-file", data["stats_scope"])
 
+    def test_complete_supplementary_markdown_keeps_late_formula_and_redacts_canary(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = self.task(temp, "Read formulas.md for the exact test formulas. Write result.json.")
+            formulas = ("# Formulas\n" + "Use only the observations in the rolling window.\n" * 50
+                        + "Conditional coverage: LR_cc = LR_uc + LR_ind; use chi-square with 2 degrees of freedom.\n"
+                        + "secret-canary\n")
+            self.assertGreater(formulas.index("Conditional coverage"), 2000)
+            (root / "formulas.md").write_text(formulas, encoding="utf-8")
+            inspection = next(item["inspection"] for item in describe_files(read_task(root))
+                              if item["path"] == "formulas.md")
+            self.assertEqual(inspection["preview"], formulas.replace("secret-canary", "[REDACTED]"))
+            self.assertTrue(inspection["preview_complete"])
+
+    def test_large_markdown_keeps_incomplete_prefix_within_context_budgets(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = self.task(temp, "Read the Markdown guidance files. Write result.json.")
+            for index in range(24):
+                (root / f"guidance-{index:02d}.md").write_text("# Guidance\n" + "bounded text " * 8000,
+                                                             encoding="utf-8")
+            inspections = [item["inspection"] for item in describe_files(read_task(root))
+                           if "inspection" in item]
+            previews = [item for item in inspections if "preview" in item]
+            self.assertGreater(len(previews), 1)
+            self.assertTrue(all(item["preview"].startswith("# Guidance") for item in previews))
+            self.assertTrue(all(item["preview_complete"] is False for item in previews))
+            self.assertTrue(all(len(json.dumps(item, ensure_ascii=False)) <= 6000 for item in inspections))
+            self.assertLessEqual(sum(len(json.dumps(item, ensure_ascii=False)) for item in previews), 32000)
+            self.assertLess(len(previews), 24)
+
     def test_malformed_and_oversized_inputs_do_not_abort_inspection(self):
         with tempfile.TemporaryDirectory() as temp:
             root = self.task(temp, "Read large.json bad.json bad.parquet. Write result.json.")

@@ -1,4 +1,4 @@
-"""Small, explicit history adapters; absence of a supported series means no fallback."""
+"""Input-only recovery estimates when the House model cannot finish a roster."""
 import math
 import calendar
 import re
@@ -111,3 +111,110 @@ def baseline_rows(task, index):
         build_answer(dict(task, entities=[entity]), [row])
         result[entity['entity_id']] = row
     return result
+
+
+_CANARY = re.compile(r'(?i)(?:canary|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})')
+
+
+def _emergency_fact(task, entity, index):
+    """Return one exact, eligible, entity-bound excerpt; never invent a citation."""
+    eid = entity['entity_id']
+    query = ' '.join(str(entity.get(key, '')) for key in ('entity_id', 'name'))
+    query += ' ' + str(task['target'].get('name', ''))
+    passages = [(hit.passage.doc_id, hit.passage.span_start, hit.passage.span_end)
+                for hit in index.search(query, top_k=20, entity_id=eid)]
+    passages += [(doc.doc_id, 0, len(doc.text)) for doc in index.documents.values()
+                 if doc.admits(eid)]
+    fallback = None
+    for doc_id, begin, limit in passages:
+        doc = index.documents[doc_id]
+        start = begin + len(doc.text[begin:limit]) - len(doc.text[begin:limit].lstrip())
+        if start >= limit:
+            continue
+        end = min(limit, start + 240)
+        while end > start and len(doc.text[start:end].encode('utf-8')) > 320:
+            end -= 1
+        quote = doc.text[start:end].rstrip()
+        end = start + len(quote)
+        if (len(quote) < 20 or len(re.findall(r'[A-Za-z]{2,}', quote)) < 3
+                or _CANARY.search(quote)):
+            continue
+        citation = {'doc_id': doc_id, 'span_start': start, 'span_end': end,
+                    'claim': index.validate_span(doc_id, start, end, entity_id=eid)}
+        if re.search(r'\d', quote):
+            return citation
+        if fallback is None:
+            fallback = citation
+    return fallback
+
+
+def _bounded_feature(value):
+    if type(value) not in (int, float):
+        return None
+    try:
+        number = float(value)
+    except (OverflowError, ValueError):
+        return None
+    # Leave room for the interval width; a finite point can overflow its bounds.
+    return number if math.isfinite(number) and math.isfinite(number * 1.5) else None
+
+
+def _emergency_prediction(task, entity, kind, labels, unit):
+    """Conservative, outcome-free forecast; model rows always replace this estimate."""
+    row = {'entity_id': entity['entity_id']}
+    target_name = str(task['target'].get('name', '')).casefold()
+    if unit is not None:
+        row['unit'] = unit
+    if kind == 'classification':
+        if not labels:
+            return None
+        row['label'] = next((value for value in ('no_event', 'inline', 'up')
+                             if value in labels), labels[0])
+        row['interval'] = {'level': .9, 'lo': 0.0, 'hi': 1.0}
+        consensus = _bounded_feature(entity.get('consensus_eps'))
+        if 'eps' in target_name and consensus is not None:
+            # EPS classification can still score a numeric EPS interval. The
+            # mounted consensus supplies the scale; this band is uncalibrated.
+            width = max(1.0, abs(consensus) * .5)
+            row['point_forecast'] = consensus
+            row['interval'] = {'level': .9, 'lo': consensus - width, 'hi': consensus + width}
+        return row
+    point = 0.0
+    if kind == 'ranking':
+        candidates = []
+        for key, value in entity.items():
+            if not any(word in key.casefold() for word in ('change', 'growth', 'momentum')):
+                continue
+            candidate = _bounded_feature(value)
+            if candidate is not None:
+                candidates.append((key, candidate))
+        if candidates:
+            point = candidates[0][1]
+    elif kind != 'regression':
+        return None
+    unit_name = (unit or '').casefold()
+    width = (100.0 if 'bps' in unit_name or 'basis_point' in unit_name else
+             20.0 if 'pct' in unit_name or 'percent' in unit_name or 'pct' in target_name else
+             max(1.0, abs(point) * .5))
+    row['point_forecast'] = point
+    row['interval'] = {'level': .9, 'lo': point - width, 'hi': point + width}
+    return row
+
+
+def emergency_rows(task, index, *, missing=None):
+    """Cover unresolved rows only when a real pre-cutoff citation is available."""
+    kind, _, units, labels = _task_contract(task)
+    needed = set(missing) if missing is not None else {e['entity_id'] for e in task['entities']}
+    rows = {}
+    for entity in task['entities']:
+        eid = entity['entity_id']
+        if eid not in needed:
+            continue
+        citation = _emergency_fact(task, entity, index)
+        row = _emergency_prediction(task, entity, kind, labels, units[eid])
+        if citation is None or row is None:
+            continue
+        row['claims'] = [citation]
+        build_answer(dict(task, entities=[entity]), [row])
+        rows[eid] = row
+    return rows

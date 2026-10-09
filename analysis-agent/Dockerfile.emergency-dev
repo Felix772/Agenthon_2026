@@ -1,0 +1,5 @@
+# Local validation layer over the frozen, unpublished E2 candidate.
+FROM agenthon-t4:e2-20261001-v1
+COPY analysis_agent/cli.py /app/analysis-agent/analysis_agent/cli.py
+COPY analysis_agent/fallback.py /app/analysis-agent/analysis_agent/fallback.py
+COPY analysis_agent/pipeline.py /app/analysis-agent/analysis_agent/pipeline.py

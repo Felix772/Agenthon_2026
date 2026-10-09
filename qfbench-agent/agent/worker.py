@@ -3,6 +3,7 @@
 Audit hooks catch ordinary accidental violations; they are NOT a hostile-code
 sandbox. Use read-only Docker mounts, restricted networking and resource caps.
 """
+import importlib.util
 import os
 import random
 import resource
@@ -25,6 +26,11 @@ def main():
     import pandas  # noqa: F401
     import scipy  # noqa: F401
     import pyarrow  # noqa: F401
+    # statsmodels (and arch through it) may import optional Polars. Its CPU
+    # feature probe loads libc with ctypes, so initialize this installed
+    # dependency before generated code loses access to native system calls.
+    if importlib.util.find_spec("polars") is not None:
+        import polars  # noqa: F401
 
     seed = int(os.environ.get("QFBENCH_SEED", "0"))
     random.seed(seed)

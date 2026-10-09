@@ -1,0 +1,151 @@
+{
+  "created_at_utc": "2026-10-09T16:11:45.318455+00:00",
+  "scope": "Local runtime and public contract checks; no new official score or rank claim.",
+  "upstream_heads": {
+    "Agenthon2026-public": "6fe0fe79f638759891fc0a097d0a57eaff9fe772",
+    "track1-coding-public": "3fa6e295601b18e0427502117a26ac4fcf32cdb2",
+    "track2-forecasting-public": "30c8019d997f930eab9ba569d089d12298d86d8c",
+    "track3-simulation-public": "bffb57227f796f9fa769a23d01fc364bee14a119",
+    "track4-analysis-public": "458bc07efc05983de342ccb371e2b3cd793d621f"
+  },
+  "toolkit": "2.6.0",
+  "analysis_scorer": "5.2.2",
+  "t1": {
+    "image": "sha256:0c8ae4b6b7178633e1c58c023835d83327e916a7073817944120b35d73cacacf",
+    "tag": "agenthon-t1:native-context-20261009",
+    "fixes": [
+      "Preload installed Polars before the unchanged worker audit restrictions.",
+      "Preserve complete supplemental Markdown within existing input budgets."
+    ],
+    "exact_image_tests": {
+      "passed": 25,
+      "subtests": 41
+    },
+    "card_prompt_preflight": "86/86; not 86 solved tasks",
+    "source_binding": "12/12 files match",
+    "cross_uid_readable_items": 15,
+    "evt_checker_control": {
+      "positive_passed": 8,
+      "negative_rejected": 7,
+      "cases": 8,
+      "limitation": "One tiny normal-branch p-value difference is within checker tolerance."
+    },
+    "historical_crash_causes_fully_resolved": false,
+    "real_house_domain_quality": "UNMEASURED"
+  },
+  "t2": {
+    "image": "sha256:461ad3fb69becc4084744879ba8f9bf53ae7e4de64f49785f14fae3a217aa8a3",
+    "algorithm": "Retain 950513 behavior; no new quality optimization.",
+    "host_tests": {
+      "passed": 51,
+      "subtests": 15
+    },
+    "public_container_exit_zero": 104,
+    "current_official_smoke_accepted": 104,
+    "fixture_note": "Container staging text has Windows CRLF; all differences from canonical Git blobs were proven newline-only. All binary inputs match. Official smoke uses exact Git blob bytes.",
+    "quality_improvement": "UNMEASURED"
+  },
+  "t3": {
+    "image": "sha256:2c88bb849a19a485a4964fa343ef9a18fd144ce77e76f69394315e2691649ec1",
+    "tag": "simulation-agent:scalar-notices-20261009-v3",
+    "change": "ABIDES BSD-3-Clause and organizer MIT notices only.",
+    "unchanged_runtime_files": 9424,
+    "unchanged_python_packages": 15,
+    "current_g0_through_g3": "Single scenario and batch pass.",
+    "identical_parquet_outputs": 10,
+    "prior_performance": "426/426 and +8.97% mean local rate belong to the frozen pre-notice scalar experiment; not remeasured on this image."
+  },
+  "t4": {
+    "image": "sha256:c1fef9efaac99c1585f076397097bacd9acbd507ee773097ac3f2f4b5ef7de76",
+    "tag": "agenthon-t4:emergency-20261009-v3",
+    "source_binding": "7/7 application files match",
+    "host_tests": {
+      "passed": 203,
+      "skipped": 2
+    },
+    "strict_offline_exit_zero": 11,
+    "current_official_smoke_accepted": 11,
+    "claims": 78,
+    "claim_tokenizer": "UNCHECKED; tokenizer unavailable",
+    "slow_house_recovery": "One request; watchdog fired; exit 0, no OOM, complete validated output.",
+    "timing_harness_limitation": "Original lower-bound assertion failed: Docker UTC 39.234s versus host monotonic 40.919s. Functional evidence passes; no performance inference.",
+    "quality": "UNMEASURED; generic estimates are uncalibrated and may have weak predictive relevance."
+  },
+  "chatgpt_review": {
+    "url": "https://chatgpt.com/g/g-p-6ab1634500348191967c38123bc3c2dc-agenthon-2026/c/6abdb060-20b4-83e9-a25f-8661e5b6a32e",
+    "method": "Authorized source-and-log snapshot through the original conversation; live connector unavailable.",
+    "conclusion": "Updated review found no concrete unresolved P0; T1/T3/T4 local checks accepted, T2 final results subsequently completed. Quality remains unmeasured."
+  },
+  "public_development_leaderboard": {
+    "source": "https://www.agenthon.net/#leaderboard",
+    "observed_at_utc": "2026-10-09T16:09:00Z",
+    "team": "Banana Kingdom",
+    "t1": {
+      "rank": "tied 58",
+      "score": 0.093,
+      "leader_score": 0.7674
+    },
+    "t2": {
+      "rank": 84,
+      "score": -2.5388,
+      "leader_score": -1.3403
+    },
+    "t3": "Team absent from 33-team public list; cannot establish current rank.",
+    "t4": "not scored",
+    "limitations": "Periodic website sync; no submission ID mapping. Four known submission API endpoints returned anonymous 404, not proof of deletion."
+  },
+  "publication": {
+    "new_images_pushed": false,
+    "new_archives_created": false,
+    "new_platform_submissions": false,
+    "blocked_on": "Automatic approval rejected public Docker image push; explicit approval for the three exact images/destinations requested and pending.",
+    "next_steps": [
+      "Publish approved images and verify anonymous pull by digest.",
+      "Use official 2.6.0 pack with Team Key entered only in its hidden prompt.",
+      "Verify packages and run authorized Development test submissions."
+    ]
+  },
+  "source_sha256": {
+    "qfbench-agent/agent/worker.py": "359eb2a4278c2d9a79f825b754702fe7ff48de7fc2724c865406b0048f1ed4aa",
+    "qfbench-agent/agent/task_reader.py": "8bccd1b33ec05d8db115d630b101e9b57f2823259d24705bdadcea5b501b930a",
+    "qfbench-agent/tests/test_agent.py": "c9500e212f5e454a77218f72130b685074b92cc37d7062539b57aa670a38789f",
+    "qfbench-agent/tests/test_input_contract.py": "751cab3c463c87ba09a80204a0650b8343d4518367c4de2fc18937b242e00cf6",
+    "analysis-agent/analysis_agent/cli.py": "ee27ff14b00bd065a2a772b9f6d4ce19be4f87c4b366cbae2dce31b5b0a3bc15",
+    "analysis-agent/analysis_agent/fallback.py": "ba95fb47a40ee7153d700aa1ace84b3a8c7d01a7948db8443094bca969b9bffe",
+    "analysis-agent/analysis_agent/pipeline.py": "102da343368f8098c5fa37c65addd9c0f36bed752d3a47af084a14804d13f051",
+    "analysis-agent/tests/test_recovery.py": "b4497a4f9553827dea47011e6caa7e25a852b9f6fb8169834c6043bd28579c58",
+    "analysis-agent/Dockerfile.emergency-dev": "6e5d2464c9bbf66f909b35b4f3352f42e0b1ff0c6ad09546ee6a25d85d62381e",
+    "simulation-agent/release-notices-20261009/Dockerfile": "45ae3fd922f08140f05fe6cff35c1ab32b3421efcfbc2f12507858c276f8ac26",
+    "simulation-agent/release-notices-20261009/README.md": "198251e02afcc1efe190f4343ddd295d05e183132b2e56fc11c338ad2cd24a47",
+    "simulation-agent/release-notices-20261009/notices/ABIDES-BSD-3-Clause.txt": "eb7436304f90842b81820fe1bff61e4cfba74584021797bd2273680b8c15e8f9",
+    "simulation-agent/release-notices-20261009/notices/ORGANIZER-MIT.txt": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+    "simulation-agent/release-notices-20261009/notices/SOURCES.json": "73ec682ba725a216ceaa4383df50f4dcab4b8a910cf04fdc3065cbef8b425980"
+  },
+  "evidence_sha256": {
+    "project-evidence/oct08-refresh/t1-native-dependency-before.txt": "a5fd73f6773544bb42c87e093d7d48988cc0624df4bec3c54eb419c5fe51c8c3",
+    "project-evidence/oct08-refresh/t1-native-dependency-linux-full.txt": "ff73d49813c547f8be1df28eaecd82fdafaf116a90f664d5f95875a131c50647",
+    "project-evidence/oct08-refresh/t1-native-dependency-linux-copy-full.txt": "acc8941b8d2e20488e2906156eba2c6f15a2a8eca69a0594024d8ec6b231c100",
+    "project-evidence/oct08-refresh/t1-markdown-context-before.txt": "12c9c62a77815f60eef9d9cb789f29b3fcfd7d962f69fb3a4ef0b352d7d50761",
+    "project-evidence/oct08-refresh/t1-markdown-context-after.txt": "451ebe13533a6d39ed97a5ce9f19b342af2c025e3c83654899cc18c40fee5059",
+    "project-evidence/oct08-refresh/t1-native-context-image-tests.txt": "5e5274cd3900844a27cf83450a1b5c3262f4240d04d390b8cb87ca559b77acdf",
+    "project-evidence/oct08-refresh/t1-native-context-source-binding.json": "ed6aed0d21f50c5ac9685ff7676c5c46e41cd616681410abc7b0a6a39c2c36cb",
+    "project-evidence/oct08-refresh/t1-native-context-preflight.json": "65fb5d3535a4e940b52e116d54729a9ad0c31b5cea93870fd0ad09504c190e24",
+    "project-evidence/oct08-refresh/t1-evt-checker-controls.json": "870517beac665e25fa2d1165d12bf1dda9e1b77d34dcd940c3db5402f9f9a60a",
+    "project-evidence/t13-experiments/T1-PERM-AUDIT-v1/native-context-20261009-success/summary.json": "643718aa9a7b297937dd86c307ca63a89b7a1439c5cfe23eaba5684395820aa3",
+    "project-evidence/oct08-refresh/t2-host-tests-v3.txt": "c5ba589b28453979fe2644b730bdff5d67bac72a45a672a870ddd6e99cea6c28",
+    "project-evidence/oct08-refresh/t2-canonical-inputs.json": "4284c52ebb1cd1b496e13f5158a91031ca756a68ce0d6edf568353f683e4b401",
+    "project-evidence/oct08-refresh/t2-all-public-container-sweep.txt": "6897801b19c3a3523fd11aa30d4e9db592abf4abfd7a78b42c5c5ad190376046",
+    "project-evidence/oct08-refresh/t2-all-public-official-smoke.txt": "43548bc88800399c54afdea2cddecbd3efdf54d28c7cc2c0d70675ed35e678b2",
+    "project-evidence/oct08-refresh/t2-all-canonical-official-smoke.txt": "ecbf2d14917a0d1ac9c1e1b0c9cb61c1ab7a634e9db255ec4c7fe43eeffafd29",
+    "project-evidence/t3-notices-20261009-v3/verdicts.json": "f5e8c37d8073274cdc61705289459fae986b302336811240a259ad028c706008",
+    "project-evidence/t3-notices-20261009-v3/build-and-verifier-binding.json": "661a5a7550c6eee1fd906a03f941bb5fdd37ee2f7c0b8b391e1aa3972cf33aa0",
+    "project-evidence/oct08-refresh/t4-emergency-before.txt": "6d5dc0d724c601c1ed0e2282b5d2434f54aae10ecd40bb48a47229a6f8a33fe1",
+    "project-evidence/oct08-refresh/t4-final-suite.txt": "6dd0c0182e0641d1fa6b7557fde12615ad12871389277a53aedbc0d4723bc204",
+    "project-evidence/oct08-refresh/t4-v3-container-sweep.txt": "00c195b3c0a653b382e491107b3a88eac44bc785bfc1bed87c7463ecb0886ca8",
+    "project-evidence/oct08-refresh/t4-v3-source-binding.json": "77df098a95555585aafff99934f7c88d2b1815519ede7420080159669552d95a",
+    "project-evidence/oct08-refresh/v3-acceptance.json": "61bec0ffb94ce95b5d300260a8168c06191f16911142c8a4ffe187b4aebf3714",
+    "project-evidence/t4-v3-slow-checkpoint-20261009/report.json": "a66ee4134df57599eeb6b94c07202909fe4413042fd241ae21f5b66187d83a31",
+    "project-evidence/t4-v3-slow-checkpoint-20261009/functional-summary.json": "3b4d09b8f58e20952ba7186382461e4709d2eae141a1aee28608d149252eb584",
+    "project-evidence/t4-v3-slow-checkpoint-20261009/bindings.json": "be9030c2539d567673539a9b3163365513df67815f4c3fd4c66befa33115fdfe"
+  }
+}

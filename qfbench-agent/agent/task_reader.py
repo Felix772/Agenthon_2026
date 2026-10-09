@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 SEALED = {"checks", "reference", "reference_data", "solution", ".git", ".venv", "__pycache__"}
+INSPECTION_PROMPT_LIMIT = 6000
 
 
 @dataclass
@@ -99,6 +100,13 @@ def _sample_text(raw, suffix, complete):
                 return "nonfinite number"
             return {"type": type(value).__name__, "sample": value}
         return {"format": "json", "shape": shape(data)}
+    if suffix == ".md":
+        # Supplemental task formulas may end beyond the short data preview.
+        # Preserve the complete document when it fits the existing file budget.
+        details = {"preview": text, "preview_complete": complete}
+        if len(json.dumps(details, ensure_ascii=False)) <= INSPECTION_PROMPT_LIMIT:
+            return details
+        return {"preview": text[:2000], "preview_complete": False}
     return {"preview": text[:2000]}
 
 
@@ -186,7 +194,7 @@ def describe_files(task):
                     details = {}
                 encoded = task.redact(json.dumps(details, ensure_ascii=False, allow_nan=False))
                 # Never truncate serialized JSON into a malformed prompt value.
-                if len(encoded) <= min(6000, remaining):
+                if len(encoded) <= min(INSPECTION_PROMPT_LIMIT, remaining):
                     item["inspection"] = json.loads(encoded)
                     remaining -= len(encoded)
                 else:

@@ -147,6 +147,36 @@ class ReaderAndClientTests(unittest.TestCase):
 
 @unittest.skipUnless(sys.platform == "linux", "Execution integration tests run in Linux Docker")
 class ExecutionTests(unittest.TestCase):
+    def test_worker_computes_with_installed_econometrics_libraries(self):
+        snippets = {
+            "statsmodels_adf": '''import numpy as np
+from statsmodels.tsa.stattools import adfuller
+series = np.random.default_rng(17).normal(size=120)
+statistic, pvalue, usedlag, *_ = adfuller(series, maxlag=1, autolag=None)
+assert np.isfinite(statistic) and 0 <= pvalue <= 1 and usedlag == 1
+''',
+            "arch_garch": '''import numpy as np
+from arch import arch_model
+series = np.random.default_rng(17).normal(size=120)
+fit = arch_model(series, mean="Zero", vol="GARCH", p=1, q=1).fit(disp="off")
+assert fit.convergence_flag == 0 and np.isfinite(fit.params).all()
+variance = fit.forecast(horizon=1).variance.iloc[-1, 0]
+assert np.isfinite(variance) and variance > 0
+''',
+        }
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            make_task(root / "task")
+            for name, code in snippets.items():
+                with self.subTest(library=name):
+                    out = root / name
+                    out.mkdir()
+                    script = root / (name + ".py")
+                    script.write_text(code, encoding="utf-8")
+                    result = execute(script, root / "task", out, time.monotonic() + 30)
+                    self.assertEqual(result["returncode"], 0, result["log"])
+                    self.assertFalse(result["timed_out"])
+
     def test_parquet_output_and_missing_deliverable_repair(self):
         missing = json.dumps({"code": "print('no output yet')", "deliverables": ["results.json"]})
         code = CODE + '\ndata.to_parquet(out / "data.parquet", index=False)\n'
@@ -184,6 +214,7 @@ class ExecutionTests(unittest.TestCase):
             'open("reward.json", "w").write("1")',
             'import os; open(os.environ["TASK_DIR"] + "/data.csv", "w").write("bad")',
             'import socket; socket.socket()',
+            'import ctypes; ctypes.CDLL("libc.so.6")',
             'import os; open(os.environ["TASK_DIR"] + "/checks/hidden.txt").read()',
         ]
         with tempfile.TemporaryDirectory() as temp:

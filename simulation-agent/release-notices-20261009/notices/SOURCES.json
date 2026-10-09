@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "scope": "License notices only; no runtime source or dependency changes",
+  "parent_image": "sha256:a12731a118178e10469608ec92172bc7db4b799a2b4ad8cd2b1acf939dd053c9",
+  "abides_source_commit": "f9cbe51342b7dedd9587e4e069040d68a5c6477f",
+  "licenses": [
+    {
+      "sha256": "eb7436304f90842b81820fe1bff61e4cfba74584021797bd2273680b8c15e8f9",
+      "source": "https://raw.githubusercontent.com/jpmorganchase/abides-jpmc-public/f9cbe51342b7dedd9587e4e069040d68a5c6477f/LICENSE",
+      "file": "ABIDES-BSD-3-Clause.txt"
+    },
+    {
+      "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+      "source": "https://raw.githubusercontent.com/Agenthon-2026/track3-simulation-public/bffb57227f796f9fa769a23d01fc364bee14a119/LICENSE",
+      "file": "ORGANIZER-MIT.txt"
+    }
+  ],
+  "official_repository_heads": {
+    "Agenthon2026-public": "6fe0fe79f638759891fc0a097d0a57eaff9fe772",
+    "track1-coding-public": "3fa6e295601b18e0427502117a26ac4fcf32cdb2",
+    "track2-forecasting-public": "30c8019d997f930eab9ba569d089d12298d86d8c",
+    "track3-simulation-public": "bffb57227f796f9fa769a23d01fc364bee14a119",
+    "track4-analysis-public": "458bc07efc05983de342ccb371e2b3cd793d621f"
+  }
+}

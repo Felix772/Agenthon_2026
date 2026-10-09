@@ -39,7 +39,7 @@ def diagnostic(path, stage, category, started, client=None, *, reason_status=Non
     observation = (state or {}).get('diagnostic', {})
     phase = observation.get('prediction_stage')
     if phase in {'input_validation', 'request_capacity', 'initial_prediction', 'repair',
-                 'assembly', 'optional_reasons', 'complete'}:
+                 'assembly', 'emergency_fallback', 'optional_reasons', 'complete'}:
         value['prediction_stage'] = phase
     for field in ('unresolved_rows', 'fallback_rows', 'model_rows', 'send_budget_remaining'):
         count = observation.get(field)
@@ -197,11 +197,11 @@ def main(argv=None):
         try:
             client = house_client()
         except RuntimeError:
-            client = None  # Only supported input-history estimates may replace missing House access.
+            client = None
         stage = 'prediction'
         answer = analyze(task, index, client, deadline,
                          checkpoint=lambda value: write_answer(task, value, args.out),
-                         enable_reasons=args.reasons, state=state)
+                         enable_reasons=args.reasons, allow_emergency=True, state=state)
         stage = 'output'
         write_answer(task, answer, args.out)
         diagnostic(args.diagnostics, 'complete', None, started, client,

@@ -66,6 +66,73 @@ def test_public_fallback_coverage_is_explicit_and_not_all_families():
         't4-auction-btc-202411-us7': 7, 't4-cpicomp-202410-us11': 11}
 
 
+@pytest.mark.parametrize('name', [
+    't4-cotpos-202411-us10', 't4-credit-event-2023',
+    't4-eps-growth-2024Q3-banks', 't4-eps-yoy-2023Q2-mixed',
+    't4-EXAMPLE-eps-beat', 't4-fomc-curve-20220728',
+    't4-fomc-curve-20240918', 't4-macrorev-20240930-us6',
+    't4-postearn-20240201-megacap',
+])
+def test_missing_house_still_produces_complete_evidence_bound_answer(name):
+    _, task, index = public_input(name)
+    answer = analyze(task, index, None, time.monotonic()+10, allow_emergency=True)
+    assert len(answer['entity_predictions']) == len(task['entities'])
+    for row in answer['entity_predictions']:
+        for claim in row['claims']:
+            assert claim['doc_id'] in index.documents
+            assert index.validate_span(claim['doc_id'], claim['span_start'],
+                                       claim['span_end'], entity_id=row['entity_id']) == claim['claim']
+
+
+def test_emergency_mode_does_not_replace_a_complete_house_answer():
+    task, index = setup(n=3)
+    control = analyze(task, index, FakeClient(), time.monotonic()+10)
+    candidate = analyze(task, index, FakeClient(), time.monotonic()+10,
+                        allow_emergency=True)
+    assert candidate == control
+
+
+def test_emergency_eps_classification_keeps_numeric_interval_on_eps_scale():
+    _, task, index = public_input('t4-EXAMPLE-eps-beat')
+    answer = analyze(task, index, None, time.monotonic()+10, allow_emergency=True)
+    row = answer['entity_predictions'][0]
+    consensus = task['entities'][0]['consensus_eps']
+    assert row['point_forecast'] == consensus
+    assert row['interval']['lo'] <= consensus <= row['interval']['hi']
+
+
+@pytest.mark.parametrize('feature', [10**400, 1.7e308])
+def test_emergency_ranking_ignores_features_that_cannot_form_finite_bounds(feature):
+    task, index = setup(n=1)
+    task['target']['type'] = 'ranking'
+    task['entities'][0]['momentum'] = feature
+    answer = analyze(task, index, None, time.monotonic()+10, allow_emergency=True)
+    row = answer['entity_predictions'][0]
+    assert row['point_forecast'] == 0.0
+    assert row['interval']['lo'] < row['interval']['hi']
+
+
+def test_emergency_checkpoint_exists_before_house_can_exhaust_deadline():
+    _, task, index = public_input('t4-EXAMPLE-eps-beat')
+    snapshots = []
+
+    class Unavailable:
+        sends = 0
+
+        def complete(self, messages, deadline, *, max_sends=1):
+            # The worker may be killed during this call. Recovery must already be durable.
+            assert snapshots
+            assert len(snapshots[-1]['entity_predictions']) == len(task['entities'])
+            self.sends += 1
+            raise ModelError('synthetic deadline', category='deadline', terminal=True)
+
+    answer = analyze(task, index, Unavailable(), time.monotonic()+10,
+                     checkpoint=snapshots.append, allow_emergency=True)
+    assert snapshots[-1] == answer
+    assert 'Input-history fallback rows: 0.' in answer['evidence_trace']
+    assert f"Generic emergency fallback rows: {len(task['entities'])}." in answer['evidence_trace']
+
+
 @pytest.mark.parametrize('name', ['t4-auction-btc-202411-us7', 't4-cpicomp-202410-us11'])
 def test_no_client_returns_complete_input_history_answer(name):
     _, task, index = public_input(name)

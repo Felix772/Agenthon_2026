@@ -4,7 +4,7 @@ import json
 import time
 
 from .contract import ContractError, _task_contract, build_answer
-from .fallback import baseline_rows
+from .fallback import baseline_rows, emergency_rows
 from .retrieval import calendar_date
 
 
@@ -153,7 +153,8 @@ class SendBudget:
         return self.client.complete(messages, deadline, max_sends=1)
 
 
-def analyze(task, index, client, deadline, *, checkpoint=None, enable_reasons=False, state=None):
+def analyze(task, index, client, deadline, *, checkpoint=None, enable_reasons=False,
+            allow_emergency=False, state=None):
     """`deadline` ends model work; the CLI separately reserves final-write time."""
     _, ids, _, _ = _task_contract(task)
     telemetry = {'prediction_stage': 'input_validation', 'unresolved_rows': len(ids),
@@ -165,6 +166,8 @@ def analyze(task, index, client, deadline, *, checkpoint=None, enable_reasons=Fa
     if time.monotonic() >= deadline:
         raise ContractError('analysis deadline exceeded')
     rows = baseline_rows(task, index)
+    history_ids = set(rows)
+    emergency_ids = set()
     fallback_ids = set(rows)
     model_ids, errors = set(), {}
     budget = SendBudget(client)
@@ -178,16 +181,25 @@ def analyze(task, index, client, deadline, *, checkpoint=None, enable_reasons=Fa
     groups = [task['entities'][i:i+3] for i in range(0, len(ids), 3)]
     missing_groups = sum(any(entity['entity_id'] not in rows for entity in group) for group in groups)
     recovery_only = len(groups) > budget.remaining and missing_groups > 0
+    if allow_emergency:
+        emergency = emergency_rows(task, index, missing=set(ids) - set(rows))
+        rows.update(emergency)
+        emergency_ids.update(emergency)
+        fallback_ids.update(emergency)
+        missing_groups = sum(any(entity['entity_id'] not in rows for entity in group) for group in groups)
     if missing_groups > budget.remaining:
         raise ContractError('roster exceeds available request capacity')
 
     def complete_answer():
         if set(rows) != set(ids):
             return None
-        count = len(fallback_ids - model_ids)
+        history_count = len(history_ids - model_ids)
+        emergency_count = len(emergency_ids - model_ids)
         answer = build_answer(task, [rows[eid] for eid in ids], evidence_trace=(
             'Manifest-verified pre-cutoff facts; exact entity-bound quotes. '
-            f'Input-history fallback rows: {count}. '
+            f'Input-history fallback rows: {history_count}. '
+            f'Generic emergency fallback rows: {emergency_count}. '
+            'Generic estimates are uncalibrated; interval levels are nominal. '
             'Historical residual bands are not coverage guarantees; production quality is unverified.'))
         if checkpoint is not None:
             checkpoint(answer)
@@ -200,7 +212,7 @@ def analyze(task, index, client, deadline, *, checkpoint=None, enable_reasons=Fa
     for repair in (False, True):
         observe('repair' if repair else 'initial_prediction')
         # With scarce sends, complete uncovered rows before enhancing valid history rows.
-        scheduled = sorted(groups, key=lambda group: all(entity['entity_id'] in rows for entity in group)) \
+        scheduled = sorted(groups, key=lambda group: all(entity['entity_id'] in history_ids for entity in group)) \
             if recovery_only else groups
         for group in scheduled:
             entities = [entity for entity in group if entity['entity_id'] not in model_ids
