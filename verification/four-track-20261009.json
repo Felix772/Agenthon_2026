@@ -95,15 +95,40 @@
     "limitations": "Periodic website sync; no submission ID mapping. Four known submission API endpoints returned anonymous 404, not proof of deletion."
   },
   "publication": {
-    "new_images_pushed": false,
+    "new_images_pushed": true,
     "new_archives_created": false,
-    "new_platform_submissions": false,
-    "blocked_on": "Automatic approval rejected public Docker image push; explicit approval for the three exact images/destinations requested and pending.",
+    "new_platform_submissions": true,
+    "authorization": "User explicitly approved public publication and Development test submissions on 2026-10-09.",
+    "public_images": {
+      "t1": "docker.io/felix772/agenthon-2026-t1@sha256:0c8ae4b6b7178633e1c58c023835d83327e916a7073817944120b35d73cacacf",
+      "t2": "docker.io/felix772/agenthon-2026-t2@sha256:461ad3fb69becc4084744879ba8f9bf53ae7e4de64f49785f14fae3a217aa8a3",
+      "t3": "docker.io/felix772/agenthon-2026-t3@sha256:2c88bb849a19a485a4964fa343ef9a18fd144ce77e76f69394315e2691649ec1",
+      "t4": "docker.io/felix772/agenthon-2026-t4@sha256:c1fef9efaac99c1585f076397097bacd9acbd507ee773097ac3f2f4b5ef7de76"
+    },
+    "anonymous_verification": "All four public registry manifest/config digests and access to every layer verified. Docker pulls with empty credentials passed using the existing local layer cache; not cold-pull timing.",
+    "submissions": {
+      "t2": {
+        "competition_id": 17766,
+        "phase_id": 29643,
+        "phase": "Development",
+        "id": 972754,
+        "account": "felix772",
+        "submitted_at_platform_local": "2026-10-09 12:30 EDT",
+        "observed_status": "Submitting",
+        "package_sha256": "7ccdd2cb524d39498044461849346e1553ea508aff77a09874a48208a6b09162",
+        "package_bytes": 1016,
+        "package_provenance": "Reused unchanged signed 2026-09-28 package after current toolkit 2.6.0 validation and exact descriptor/image binding verification.",
+        "score": null
+      }
+    },
+    "blocked_on": "T1/T3/T4 packages need the user's Team Key entered in the official hidden prompt. Publication approval is resolved.",
     "next_steps": [
-      "Publish approved images and verify anonymous pull by digest.",
-      "Use official 2.6.0 pack with Team Key entered only in its hidden prompt.",
-      "Verify packages and run authorized Development test submissions."
-    ]
+      "Finish official T1/T3/T4 packaging with pack-interactive.ps1 -Tracks t1,t3,t4.",
+      "Verify packages and upload each once to its Development phase.",
+      "Record platform receipts and scoring status without treating queue acceptance as a score."
+    ],
+    "development_dispatch_cutoff_utc": "2026-10-12T20:00:00Z",
+    "development_dispatch_cutoff_source": "https://github.com/Agenthon-2026/track2-forecasting-public/issues/18"
   },
   "source_sha256": {
     "qfbench-agent/agent/worker.py": "359eb2a4278c2d9a79f825b754702fe7ff48de7fc2724c865406b0048f1ed4aa",
