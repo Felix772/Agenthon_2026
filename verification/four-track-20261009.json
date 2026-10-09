@@ -96,7 +96,7 @@
   },
   "publication": {
     "new_images_pushed": true,
-    "new_archives_created": false,
+    "new_archives_created": true,
     "new_platform_submissions": true,
     "authorization": "User explicitly approved public publication and Development test submissions on 2026-10-09.",
     "public_images": {
@@ -119,16 +119,87 @@
         "package_bytes": 1016,
         "package_provenance": "Reused unchanged signed 2026-09-28 package after current toolkit 2.6.0 validation and exact descriptor/image binding verification.",
         "score": null
+      },
+      "t1": {
+        "competition_id": 17765,
+        "phase_id": 29640,
+        "phase": "Development",
+        "id": 972771,
+        "account": "felix772",
+        "submitted_as": "Yourself",
+        "submitted_at_platform_local": "2026-10-09 12:45 EDT",
+        "observed_at_utc": "2026-10-09T16:47:17.4564292Z",
+        "observed_status": "Submitting",
+        "visible_confirmation": "Running submission.zip (ID = 972771)",
+        "package": "releases/development-20261009/t1/submission.zip",
+        "package_sha256": "5549477f671bbc4e4e03cd55cd97713f6727f1d9c570543e4dfc29ba363ab509",
+        "package_bytes": 1210,
+        "package_provenance": "Official toolkit 2.6.0 pack with user-supplied hidden Team Key; schema, descriptor seal, claim structure and descriptor byte binding verified. HMAC authentication remains with organizer.",
+        "image_digest": "sha256:0c8ae4b6b7178633e1c58c023835d83327e916a7073817944120b35d73cacacf",
+        "quota_after_upload": {
+          "total": "3/23",
+          "daily": "1/1"
+        },
+        "score": null,
+        "verification_method": "Authenticated CodaBench My Submissions Development confirmation banner and matching table row.",
+        "url": "https://www.codabench.org/competitions/17765/#/participate-tab"
+      },
+      "t3": {
+        "competition_id": 17767,
+        "phase_id": 29646,
+        "phase": "Development",
+        "id": 972772,
+        "account": "felix772",
+        "submitted_as": "Yourself",
+        "submitted_at_platform_local": "2026-10-09 12:45 EDT",
+        "observed_at_utc": "2026-10-09T16:47:17.4564292Z",
+        "observed_status": "Submitting",
+        "visible_confirmation": "Running submission.zip (ID = 972772)",
+        "package": "releases/development-20261009/t3/submission.zip",
+        "package_sha256": "7a80fdec27aac9e1bd09c2555deeaffd8edd494dc2042632f98f62af91da5d28",
+        "package_bytes": 1027,
+        "package_provenance": "Official toolkit 2.6.0 pack with user-supplied hidden Team Key; schema, descriptor seal, claim structure and descriptor byte binding verified. HMAC authentication remains with organizer.",
+        "image_digest": "sha256:2c88bb849a19a485a4964fa343ef9a18fd144ce77e76f69394315e2691649ec1",
+        "quota_after_upload": {
+          "total": "3/23",
+          "daily": "1/5"
+        },
+        "score": null,
+        "verification_method": "Authenticated CodaBench My Submissions Development confirmation banner and matching table row.",
+        "url": "https://www.codabench.org/competitions/17767/#/participate-tab"
+      },
+      "t4": {
+        "competition_id": 17768,
+        "phase_id": 29649,
+        "phase": "Development",
+        "id": 972773,
+        "account": "felix772",
+        "submitted_as": "Yourself",
+        "submitted_at_platform_local": "2026-10-09 12:46 EDT",
+        "observed_at_utc": "2026-10-09T16:47:17.4564292Z",
+        "observed_status": "Submitting",
+        "visible_confirmation": "Running submission.zip (ID = 972773)",
+        "package": "releases/development-20261009/t4/submission.zip",
+        "package_sha256": "d283cabea7ca90bfda3821b3b3a7c36561927a3b2bed8ca0607731b5bf2b747b",
+        "package_bytes": 1214,
+        "package_provenance": "Official toolkit 2.6.0 pack with user-supplied hidden Team Key; schema, descriptor seal, claim structure and descriptor byte binding verified. HMAC authentication remains with organizer.",
+        "image_digest": "sha256:c1fef9efaac99c1585f076397097bacd9acbd507ee773097ac3f2f4b5ef7de76",
+        "quota_after_upload": {
+          "total": "4/20",
+          "daily": "1/5"
+        },
+        "score": null,
+        "verification_method": "Authenticated CodaBench My Submissions Development confirmation banner and matching table row.",
+        "url": "https://www.codabench.org/competitions/17768/#/participate-tab"
       }
     },
-    "blocked_on": "T1/T3/T4 packages need the user's Team Key entered in the official hidden prompt. Publication approval is resolved.",
+    "blocked_on": null,
     "next_steps": [
-      "Finish official T1/T3/T4 packaging with pack-interactive.ps1 -Tracks t1,t3,t4.",
-      "Verify packages and upload each once to its Development phase.",
-      "Record platform receipts and scoring status without treating queue acceptance as a score."
+      "Organizer dispatch and official scoring are pending; no new performance, score, rank or zero-failure claim."
     ],
     "development_dispatch_cutoff_utc": "2026-10-12T20:00:00Z",
-    "development_dispatch_cutoff_source": "https://github.com/Agenthon-2026/track2-forecasting-public/issues/18"
+    "development_dispatch_cutoff_source": "https://github.com/Agenthon-2026/track2-forecasting-public/issues/18",
+    "all_four_development_receipts_received": true
   },
   "source_sha256": {
     "qfbench-agent/agent/worker.py": "359eb2a4278c2d9a79f825b754702fe7ff48de7fc2724c865406b0048f1ed4aa",
