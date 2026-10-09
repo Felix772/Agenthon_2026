@@ -2,6 +2,35 @@
 
 A single-agent generate/execute/repair implementation for Agenthon 2026 Track 1.
 See [MODEL-ACCESS.md](MODEL-ACCESS.md) for the current House API contract and access status.
+
+### Local E1 experiment (October 9, 2026)
+
+`AGENT_E1_SEMANTIC` defaults to `0`. This experiment is disabled in production and
+does not change the image submitted as Development run `972771`. Set it to `1`
+only for an explicit local experiment. After the core solver publishes structurally
+valid deliverables, E1 requires at least 155 seconds of remaining work time and two
+remaining request slots. It can generate one independent checker through the House
+route, then make at most one repair request. The same checker is reused on the repair.
+The existing 360-second solve cap and 25-request allowance remain unchanged.
+
+Checks must quote an explicit instruction requirement and compute from runtime
+inputs. The checker receives no solver source, cannot write the candidate, and runs
+with the existing network, process, ctypes and sealed-input restrictions. An invalid
+checker, timeout, insufficient budget or unsuccessful repair keeps the original
+candidate. Small original deliverables (up to 8 MiB total, subject to output-space
+checks) are preserved before optional work. A private supervisor pipe authenticates
+the recovery snapshot; an output marker alone cannot turn a timeout into success.
+E1 supervision requires an exclusive CLI process and is disabled if the supervisor
+already has children. Do not invoke it in a host that starts unrelated subprocesses
+concurrently. The checker's separate result pipe isolates stdout; it is not a
+hostile-code boundary or an unforgeable proof that the mathematics is correct.
+
+The checker is model-generated and can be wrong. Its result is not an official
+domain verdict. Validation so far uses scripted synthetic responses; it establishes
+engineering behavior, not real House quality or a competition score gain. See
+`../project-evidence/t1-semantic-e1-20261009/` and
+`../verification/t1-semantic-20261009.json` for exact executed and pending tests.
+
 The competition entrypoint remains:
 
 ```text
@@ -11,7 +40,8 @@ solve --task-dir /input --out /app/output
 **Current evidence:** API and synthetic Docker-to-official-verifier tests pass under the
 published Development restrictions, including non-root execution and the 64 MiB file limit.
 The actual House service, audited proxy, GPU and real finance accuracy remain unverified.
-See [RUNTIME-TEST-RESULTS.md](RUNTIME-TEST-RESULTS.md). This project is not submitted.
+See [RUNTIME-TEST-RESULTS.md](RUNTIME-TEST-RESULTS.md). The released control was
+submitted as Development run `972771`; its current official result is unavailable.
 
 The original diagnostic skeleton is saved in Git tag `diagnostic-baseline`; the current `solve`
 requires model settings and fails clearly if they are missing. It no longer creates diagnostic.json.

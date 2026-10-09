@@ -1,0 +1,167 @@
+{
+  "scope": "Opt-in local T1 E1 runtime semantic checker and bounded repair",
+  "production_enabled": false,
+  "default_flag": "AGENT_E1_SEMANTIC=0",
+  "submitted_control": 972771,
+  "control_image_changed": false,
+  "real_house_calls": 0,
+  "financial_pass_rate": null,
+  "official_domain_verdict": null,
+  "new_image_built": false,
+  "published": false,
+  "submitted": false,
+  "upstream_checked_date": "2026-10-09",
+  "upstream_check_method": "Root live git ls-remote plus shared documentation-agent review; implementation agent separately read applicable current T1/shared rules",
+  "upstream_heads": {
+    "shared": "6fe0fe79f638759891fc0a097d0a57eaff9fe772",
+    "t1": "3fa6e295601b18e0427502117a26ac4fcf32cdb2",
+    "t2": "30c8019d997f930eab9ba569d089d12298d86d8c",
+    "t3": "bffb57227f796f9fa769a23d01fc364bee14a119",
+    "t4": "458bc07efc05983de342ccb371e2b3cd793d621f"
+  },
+  "bounds": {
+    "minimum_remaining_work_seconds": 155,
+    "maximum_checker_generation_calls": 1,
+    "maximum_repair_calls": 1,
+    "model_call_seconds": 30,
+    "checker_execution_seconds": 15,
+    "repair_execution_seconds": 45,
+    "maximum_snapshot_bytes": 8388608,
+    "global_solve_cap_seconds": 360,
+    "global_request_limit": 25,
+    "per_response_token_limit": 4000
+  },
+  "executed": [
+    {
+      "environment": "Windows sandbox",
+      "log": "project-evidence/t1-semantic-e1-20261009/host-first.txt",
+      "tests": 14,
+      "failures": 8,
+      "errors": 1,
+      "skipped": 5,
+      "interpretation": "Loopback transport and strict path-resolution permission failures; not Linux quality evidence"
+    },
+    {
+      "environment": "Existing Linux image with read-only current-source mount, first command",
+      "log": "project-evidence/t1-semantic-e1-20261009/linux-first.txt",
+      "status": "import_error",
+      "interpretation": "Wrong working directory imported frozen /app/agent; command corrected without rebuilding image"
+    },
+    {
+      "environment": "Existing Linux image with read-only source mount and /workspace workdir",
+      "log": "project-evidence/t1-semantic-e1-20261009/linux-first-cwd.txt",
+      "tests_passed": 14,
+      "elapsed_seconds": 45.181,
+      "source_scope": "First E1 snapshot; later safety fixes and appended tests are not covered by this run"
+    },
+    {
+      "environment": "Released Linux runtime with read-only frozen candidate source mount; non-root, network none, read-only root, capabilities dropped",
+      "log": "project-evidence/t1-semantic-e1-20261009/linux-final.txt",
+      "tests_passed": 85,
+      "semantic_tests_included": 20,
+      "elapsed_seconds": 113.716,
+      "command": "python -B -m unittest -v test_semantic test_agent test_review test_output_permissions test_solver_diagnostics test_protocol test_transport_budget",
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_scope": "Before ChatGPT-identified rollback error propagation correction; affected paths were rerun afterward"
+    },
+    {
+      "environment": "Host synthetic fault injection",
+      "log": "project-evidence/t1-semantic-e1-20261009/rollback-before.txt",
+      "tests": 2,
+      "passed": 1,
+      "failures": 1,
+      "interpretation": "Reproduced false exit0 when publication and original restoration both fail"
+    },
+    {
+      "environment": "Host synthetic fault injection after correction",
+      "log": "project-evidence/t1-semantic-e1-20261009/rollback-after.txt",
+      "tests_passed": 2,
+      "elapsed_seconds": 0.644
+    },
+    {
+      "environment": "Final frozen source in released Linux runtime with read-only source mount",
+      "log": "project-evidence/t1-semantic-e1-20261009/linux-rollback-final.txt",
+      "tests_passed": 43,
+      "semantic_tests_included": 22,
+      "elapsed_seconds": 64.122,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "command": "python -B -m unittest -v test_semantic test_solver_diagnostics test_protocol"
+    },
+    {
+      "environment": "Actual full CLI outer-watchdog recovery with umask077; then read by another Linux UID",
+      "log": "project-evidence/t1-semantic-e1-20261009/cross-uid/reader.json",
+      "writer_uid": 65534,
+      "reader_uid": 65533,
+      "readable_files": 9,
+      "restored_bytes_match_snapshot": true,
+      "scope": "Existing parent permission-finalization path; unchanged by the subsequent terminal rollback correction"
+    }
+  ],
+  "pending": [],
+  "limitations": [
+    "All model responses were scripted synthetic fixtures",
+    "An exact instruction quote does not prove generated checker correctness",
+    "Python guardrails are not a hostile-code isolation boundary",
+    "No real House/domain score gain has been measured",
+    "E1 child supervision requires an exclusive CLI process and disables optional work if preexisting children are detected",
+    "The checker result pipe separates stdout but is not a hostile-code security boundary"
+  ],
+  "source_files_sha256": [
+    {
+      "path": "qfbench-agent/agent/cli.py",
+      "sha256": "e16c04fa79e7286c9c0643184c6d78e0abb7aaaefa628001d06a8124143e40f2"
+    },
+    {
+      "path": "qfbench-agent/agent/execution.py",
+      "sha256": "e77ace3438715bf9e0b178f2f1cc2fa0eec0ab9dee03f3525d853f011fcd2f35"
+    },
+    {
+      "path": "qfbench-agent/agent/worker.py",
+      "sha256": "632eb6fe0c33e0676a71fc1753411e0c6c2a3dc8589dabc14de389b458a9e2ec"
+    },
+    {
+      "path": "qfbench-agent/agent/solver.py",
+      "sha256": "b730adeedd775aa527741a26c3a0291a2baba763024a5e4585b34e2d207ecc2b"
+    },
+    {
+      "path": "qfbench-agent/agent/semantic.py",
+      "sha256": "1201c46d994f0ff505e2a293d9d82b9e8d8fea220c1eef641ed529495ae29250"
+    },
+    {
+      "path": "qfbench-agent/tests/test_semantic.py",
+      "sha256": "33ced8b5c8612bdd66bd55755c5ad50610789e7e44b62557eec56c8d33132ffa"
+    }
+  ],
+  "pre_rollback_source_files_sha256": [
+    {
+      "path": "qfbench-agent/agent/cli.py",
+      "sha256": "e16c04fa79e7286c9c0643184c6d78e0abb7aaaefa628001d06a8124143e40f2"
+    },
+    {
+      "path": "qfbench-agent/agent/execution.py",
+      "sha256": "e77ace3438715bf9e0b178f2f1cc2fa0eec0ab9dee03f3525d853f011fcd2f35"
+    },
+    {
+      "path": "qfbench-agent/agent/worker.py",
+      "sha256": "632eb6fe0c33e0676a71fc1753411e0c6c2a3dc8589dabc14de389b458a9e2ec"
+    },
+    {
+      "path": "qfbench-agent/agent/solver.py",
+      "sha256": "383a3ad0735611a1908446ae9e95ee305bbeb93f92ce2f387509e2da27fa4bc3"
+    },
+    {
+      "path": "qfbench-agent/agent/semantic.py",
+      "sha256": "d595ed8d0cfdd205731a69234eaa13b650b7ea3d4270c9e75043c6dcdf212123"
+    },
+    {
+      "path": "qfbench-agent/tests/test_semantic.py",
+      "sha256": "f3cddb248f99f414b9c0be04a5a370a2eb86e582805f85d0483e41a6cdeda620"
+    }
+  ],
+  "rollback_fix": "SemanticRecoveryError escapes both solver catches; failed restore or cleanup cannot be reported as completed or resume ordinary generation",
+  "chatgpt_review": "Iteration 2 materials review confirmed sole rollback blocker closed; no live workspace access or independent execution claimed"
+}

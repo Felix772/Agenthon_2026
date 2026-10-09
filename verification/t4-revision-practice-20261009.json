@@ -1,0 +1,283 @@
+{
+  "date": "2026-10-09",
+  "task_id": "t4-macrorev-20240930-us6",
+  "practice_in_sample": true,
+  "prediction_sha256": {
+    "before": "ce0a2801d808a8262dd2ccb239c564f13d7c2a7f0439f363c806d26745659dc2",
+    "after": "502fc0d4879243c0eb43c542b98433a5acd39b21817dd2083f70d2a074367608"
+  },
+  "labels_sha256": "bbf2f10dfeaa4d5ef3f9213ef141c6e25bdec5f5fd9e25e6b7dfcbe3d1f3fc09",
+  "matched_exact_rows": 10,
+  "excluded_rows": [
+    {
+      "entity_id": "INDPRO_2024-07_20241017",
+      "reason": "Exact archived value unavailable at task precision"
+    },
+    {
+      "entity_id": "INDPRO_2024-08_20241017",
+      "reason": "Exact archived value unavailable at task precision"
+    }
+  ],
+  "interval_score_improved_rows": 10,
+  "before_covered_rows": 0,
+  "after_covered_rows": 10,
+  "direction_changed": false,
+  "official_score": null,
+  "limitations": [
+    "Exposed practice data, not held-out or Final evidence.",
+    "Intervals use an uncalibrated plus/minus half-anchor width fixed before label collection.",
+    "No numeric baseline point comparison is possible because it omitted points.",
+    "Do not average raw errors or interval scores across incompatible units.",
+    "Sealed naive-answer parameters and two exact INDPRO values are unavailable."
+  ],
+  "sources": [
+    {
+      "id": "census_m3_20241025",
+      "url": "https://www.census.gov/manufacturing/m3/historical_data/pressreleases/adv/2024/sep24adv.pdf",
+      "publisher": "U.S. Census Bureau",
+      "release_date": "2024-10-25",
+      "retrieval_date": "2026-10-09",
+      "locator": "PDF page 6, Table 1, DURABLE GOODS Total / New Orders; seasonally adjusted Sep, Aug, Jul 2024 columns",
+      "observed_cells": {
+        "Sep_2024": 284769,
+        "Aug_2024": 287018,
+        "Jul_2024": 289419
+      }
+    },
+    {
+      "id": "census_housing_20241018",
+      "url": "https://www.census.gov/construction/nrc/pdf/newresconst_202409.pdf",
+      "publisher": "U.S. Census Bureau / HUD",
+      "release_date": "2024-10-18",
+      "retrieval_date": "2026-10-09",
+      "locator": "PDF page 5, Table 3a, July (r), United States Total; thousands of units, seasonally adjusted annual rate",
+      "observed_cells": {
+        "Jul_2024": 1262
+      }
+    },
+    {
+      "id": "fed_g17_20241017",
+      "url": "https://www.federalreserve.gov/releases/g17/20241017/default.htm",
+      "publisher": "Board of Governors of the Federal Reserve System",
+      "release_date": "2024-10-17",
+      "retrieval_date": "2026-10-09",
+      "locator": "Industrial Production and Capacity Utilization: Summary; Total index, July(r) and Aug(r), 2017=100 seasonally adjusted",
+      "observed_cells": {
+        "Jul_2024_rounded": 102.6,
+        "Aug_2024_rounded": 102.9
+      },
+      "precision": "One decimal place only; does not establish the four-decimal ALFRED observation."
+    },
+    {
+      "id": "bls_ces_20241004",
+      "url": "https://www.bls.gov/news.release/archives/empsit_10042024.htm",
+      "publisher": "U.S. Bureau of Labor Statistics",
+      "release_date": "2024-10-04",
+      "retrieval_date": "2026-10-09",
+      "locator": "Table B-1, Total nonfarm; seasonally adjusted July and Aug 2024 columns, in thousands",
+      "observed_cells": {
+        "Jul_2024": 158692,
+        "Aug_2024": 158851
+      }
+    },
+    {
+      "id": "bls_ces_20241101",
+      "url": "https://www.bls.gov/news.release/archives/empsit_11012024.htm",
+      "publisher": "U.S. Bureau of Labor Statistics",
+      "release_date": "2024-11-01",
+      "retrieval_date": "2026-10-09",
+      "locator": "Table B-1, Total nonfarm; seasonally adjusted Aug 2024 column, in thousands",
+      "observed_cells": {
+        "Aug_2024": 158770
+      }
+    },
+    {
+      "id": "bea_pi_20241031",
+      "url": "https://www.bea.gov/sites/default/files/2024-10/pi0924.pdf",
+      "release_page_url": "https://www.bea.gov/news/2024/personal-income-and-outlays-september-2024",
+      "publisher": "U.S. Bureau of Economic Analysis",
+      "release_date": "2024-10-31",
+      "retrieval_date": "2026-10-09",
+      "locator": "PDF page 6, Table 1, line 1 Personal income; July(r) 2024, billions of dollars, seasonally adjusted at annual rates",
+      "observed_cells": {
+        "Jul_2024": 24819.3
+      }
+    },
+    {
+      "id": "bea_pi_20241127",
+      "url": "https://www.bea.gov/sites/default/files/2024-11/pi1024.pdf",
+      "release_page_url": "https://www.bea.gov/news/2024/personal-income-and-outlays-october-2024",
+      "publisher": "U.S. Bureau of Economic Analysis",
+      "release_date": "2024-11-27",
+      "retrieval_date": "2026-10-09",
+      "locator": "PDF page 6, Table 1, line 1 Personal income; Aug(r) 2024, billions of dollars, seasonally adjusted at annual rates",
+      "observed_cells": {
+        "Aug_2024": 24740.2
+      }
+    },
+    {
+      "id": "census_marts_20241017",
+      "url": "https://www2.census.gov/marts/adv2409.pdf",
+      "publisher": "U.S. Census Bureau",
+      "release_date": "2024-10-17",
+      "retrieval_date": "2026-10-09",
+      "locator": "PDF page 5, Table 1, Retail & food services total; Adjusted Jul(r) 2024 column, millions of dollars",
+      "observed_cells": {
+        "Jul_2024": 710851
+      }
+    },
+    {
+      "id": "census_marts_20241115",
+      "url": "https://www2.census.gov/marts/adv2410.pdf",
+      "publisher": "U.S. Census Bureau",
+      "release_date": "2024-11-15",
+      "retrieval_date": "2026-10-09",
+      "locator": "PDF page 5, Table 1, Retail & food services total; Adjusted Aug(r) 2024 column, millions of dollars",
+      "observed_cells": {
+        "Aug_2024": 710038
+      }
+    }
+  ],
+  "rows": [
+    {
+      "entity_id": "DGORDER_2024-07_20241025",
+      "series": "DGORDER",
+      "units": "millions of dollars, SA",
+      "outcome": 289419,
+      "source_id": "census_m3_20241025",
+      "candidate_point_absolute_error": 168.0,
+      "point_comparison": "Baseline omitted point; candidate equals input persistence",
+      "before_raw_interval_score": 5788361.000000001,
+      "before_covered": false,
+      "after_raw_interval_score": 289587.0,
+      "after_covered": true,
+      "interval_score_improved": true
+    },
+    {
+      "entity_id": "DGORDER_2024-08_20241025",
+      "series": "DGORDER",
+      "units": "millions of dollars, SA",
+      "outcome": 287018,
+      "source_id": "census_m3_20241025",
+      "candidate_point_absolute_error": 2702.0,
+      "point_comparison": "Baseline omitted point; candidate equals input persistence",
+      "before_raw_interval_score": 5740341.000000001,
+      "before_covered": false,
+      "after_raw_interval_score": 289720.0,
+      "after_covered": true,
+      "interval_score_improved": true
+    },
+    {
+      "entity_id": "HOUST_2024-07_20241018",
+      "series": "HOUST",
+      "units": "thousands of units, SAAR",
+      "outcome": 1262,
+      "source_id": "census_housing_20241018",
+      "candidate_point_absolute_error": 25.0,
+      "point_comparison": "Baseline omitted point; candidate equals input persistence",
+      "before_raw_interval_score": 25221.000000000004,
+      "before_covered": false,
+      "after_raw_interval_score": 1237.0,
+      "after_covered": true,
+      "interval_score_improved": true
+    },
+    {
+      "entity_id": "PAYEMS_2024-07_20241004",
+      "series": "PAYEMS",
+      "units": "thousands of persons, SA",
+      "outcome": 158692,
+      "source_id": "bls_ces_20241004",
+      "candidate_point_absolute_error": 55.0,
+      "point_comparison": "Baseline omitted point; candidate equals input persistence",
+      "before_raw_interval_score": 3173821.0000000005,
+      "before_covered": false,
+      "after_raw_interval_score": 158637.0,
+      "after_covered": true,
+      "interval_score_improved": true
+    },
+    {
+      "entity_id": "PAYEMS_2024-08_20241004",
+      "series": "PAYEMS",
+      "units": "thousands of persons, SA",
+      "outcome": 158851,
+      "source_id": "bls_ces_20241004",
+      "candidate_point_absolute_error": 72.0,
+      "point_comparison": "Baseline omitted point; candidate equals input persistence",
+      "before_raw_interval_score": 3177001.0000000005,
+      "before_covered": false,
+      "after_raw_interval_score": 158779.0,
+      "after_covered": true,
+      "interval_score_improved": true
+    },
+    {
+      "entity_id": "PAYEMS_2024-08_20241101",
+      "series": "PAYEMS",
+      "units": "thousands of persons, SA",
+      "outcome": 158770,
+      "source_id": "bls_ces_20241101",
+      "candidate_point_absolute_error": 9.0,
+      "point_comparison": "Baseline omitted point; candidate equals input persistence",
+      "before_raw_interval_score": 3175381.0000000005,
+      "before_covered": false,
+      "after_raw_interval_score": 158779.0,
+      "after_covered": true,
+      "interval_score_improved": true
+    },
+    {
+      "entity_id": "PI_2024-07_20241031",
+      "series": "PI",
+      "units": "billions of dollars, SAAR",
+      "outcome": 24819.3,
+      "source_id": "bea_pi_20241031",
+      "candidate_point_absolute_error": 16.099999999998545,
+      "point_comparison": "Baseline omitted point; candidate equals input persistence",
+      "before_raw_interval_score": 496367.00000000006,
+      "before_covered": false,
+      "after_raw_interval_score": 24803.200000000004,
+      "after_covered": true,
+      "interval_score_improved": true
+    },
+    {
+      "entity_id": "PI_2024-08_20241127",
+      "series": "PI",
+      "units": "billions of dollars, SAAR",
+      "outcome": 24740.2,
+      "source_id": "bea_pi_20241127",
+      "candidate_point_absolute_error": 113.5,
+      "point_comparison": "Baseline omitted point; candidate equals input persistence",
+      "before_raw_interval_score": 494785.0000000001,
+      "before_covered": false,
+      "after_raw_interval_score": 24853.700000000004,
+      "after_covered": true,
+      "interval_score_improved": true
+    },
+    {
+      "entity_id": "RSAFS_2024-07_20241017",
+      "series": "RSAFS",
+      "units": "millions of dollars, SA",
+      "outcome": 710851,
+      "source_id": "census_marts_20241017",
+      "candidate_point_absolute_error": 442.0,
+      "point_comparison": "Baseline omitted point; candidate equals input persistence",
+      "before_raw_interval_score": 14217001.000000002,
+      "before_covered": false,
+      "after_raw_interval_score": 710409.0,
+      "after_covered": true,
+      "interval_score_improved": true
+    },
+    {
+      "entity_id": "RSAFS_2024-08_20241115",
+      "series": "RSAFS",
+      "units": "millions of dollars, SA",
+      "outcome": 710038,
+      "source_id": "census_marts_20241115",
+      "candidate_point_absolute_error": 735.0,
+      "point_comparison": "Baseline omitted point; candidate equals input persistence",
+      "before_raw_interval_score": 14200741.000000002,
+      "before_covered": false,
+      "after_raw_interval_score": 710773.0,
+      "after_covered": true,
+      "interval_score_improved": true
+    }
+  ]
+}

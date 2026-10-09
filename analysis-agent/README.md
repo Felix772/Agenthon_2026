@@ -20,7 +20,7 @@ the internal unit acknowledgement from already serialized JSON, verify corpus
 offsets or dates, or establish production faithfulness. Those belong to the
 assembly, retrieval and official judge stages respectively.
 
-Use Python 3.13 and toolkit 2.5.1 for Track 4 scorer 5.2.2. Tests use synthetic
+The latest local validation uses Python 3.13, toolkit 2.6.0 and Track 4 scorer 5.2.2. Tests use synthetic
 predictions and an external pinned evaluator; set `QFBENCH_T4_SOURCE` to its source
 directory and, if stored separately, `QFBENCH_T4_UNITS` to its LF-preserving units.
 The old September 23 evaluator is not a substitute for the current contract.
@@ -53,7 +53,7 @@ empty ownership lists grant no citation permission; document-body metadata does
 not override the manifest. Unfiltered `search` remains available for offline
 retrieval comparisons and is not used by the prediction pipeline.
 
-Scorer 5.2.0 applies false-claim penalties and an optional reasoning bonus. The
+Scorer 5.2.2 applies false-claim penalties and an optional reasoning bonus. The
 old 80% prediction-entailment admission rule is not the current scoring contract.
 Schema and manifest checks do not verify neural contradiction or reason quality.
 
@@ -83,9 +83,26 @@ entity-name column. It uses the median of the latest three values and the observ
 rolling-median residual range for a nominal 90% band. This short-history band has
 no coverage guarantee and is an emergency estimate, not a measured quality gain.
 On current public inputs this provides 18 rows across 2 of 11 complete units.
-Other shapes, including classification, have no deterministic fallback. The
-adapters use target semantics, units, and actual data; they contain no unit IDs,
+Other shapes use conservative generic emergency estimates when every row has
+an eligible exact quote. These predictions are uncalibrated. The adapters use
+target semantics, units, and actual data; they contain no unit IDs,
 entity-specific answers, resolved labels, or future observations.
+
+For an explicit revision classifier that requests a point forecast of the revised
+level, the recovery estimate uses the finite `latest_precutoff_estimate` in its
+declared original units. It requires a valid reference month and the ordering
+`reference <= latest vintage <= cutoff < resolving release`. An ambiguous or
+change-only request keeps the previous generic path. The nominal 90% band is
+`anchor +/- max(1, abs(anchor)/2)`; no coverage calibration is claimed. The
+direction default remains unchanged, and valid House rows still replace it.
+
+The October 9 source candidate passes 143 focused/existing tests (one skip),
+all 11 public units in the released Linux runtime with a read-only source overlay,
+and official scorer 5.2.2 smoke checks. Ten public outputs are unchanged; only
+12 macro-revision points and intervals change. A separate practice diagnosis
+finds better raw interval scores on all 10 rows with exact archived outcomes;
+two rows lack exact outcomes and are excluded. This is in-sample evidence, not
+an official composite or a Final performance claim. See `ARTIFACT_PROVENANCE.md`.
 
 A complete input-derived answer is saved atomically before House enhancement.
 Each subsequent complete answer is checkpointed; valid model rows replace their

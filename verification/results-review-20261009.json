@@ -1,0 +1,104 @@
+{
+  "date": "2026-10-09",
+  "scope": "Read-only upstream and local quality audit followed by bounded local candidates. New official results remain unavailable.",
+  "official_results": {
+    "current_status": "UNKNOWN",
+    "reason": "CodaBench browser access remains blocked by a saved site permission after user-authorized retries. No alternate access method was used.",
+    "awaiting": "User-provided current status, score and failure details for the four exact submission IDs.",
+    "last_confirmed_status": "Submitting during the earlier upload turn; not refreshed evidence.",
+    "submissions": {
+      "t1": 972771,
+      "t2": 972754,
+      "t3": 972772,
+      "t4": 972773
+    }
+  },
+  "upstream": {
+    "method": "Fresh git ls-remote HEAD for all five repositories; applicable current documentation read again; local tracked upstream files unchanged.",
+    "changed_since_release": false,
+    "source_lock": "verification/four-track-20261009.json",
+    "toolkit": "2.6.0",
+    "analysis_scorer": "5.2.2",
+    "announced_future_analysis_scorer": "New update announced without a published switch time; do not assume current version is final.",
+    "weekly_updates": "https://github.com/Agenthon-2026/Agenthon2026-public/issues/2"
+  },
+  "local_findings": {
+    "t1": {
+      "observed": "Structurally valid output is published without numerical semantic checks; truncated responses are discarded and the full solution is requested again.",
+      "public_shape_preflight": "29 of 86 tasks request at least five artifacts; maximum thirteen.",
+      "limits": "Actual current House truncation rate and official numerical failure causes are unknown.",
+      "candidate": "Default-off, bounded independent numerical-check experiment with durable original-output recovery; no task-ID solvers or embedded answers.",
+      "validation": {
+        "report": "verification/t1-semantic-20261009.json",
+        "pre_review_linux_tests_passed": 85,
+        "post_fix_affected_linux_tests_passed": 43,
+        "final_semantic_tests_included": 22,
+        "cross_uid_recovery_files_readable": 9,
+        "real_house_calls": 0,
+        "production_enabled": false,
+        "domain_verdict": null
+      }
+    },
+    "t2": {
+      "decision": "Retain submitted algorithm; do not restart the failed D1 family.",
+      "d1_max_local_proxy_relative_gain": 0.005962284462040723,
+      "d1_evidence": "All reported uncertainty intervals cross zero; historical revision vintages remain uncertified.",
+      "source": "project-evidence/t2-d1-20261001/results.json"
+    },
+    "t3": {
+      "decision": "Retain submitted scalar candidate; do not repeat the frozen 426-run experiment.",
+      "comparison_gate": "Old self-reported Development rates and new container create-to-remove timing are not directly comparable. Require matching roster, scoring version and timing protocol before claiming an official gain.",
+      "source": "https://github.com/Agenthon-2026/track3-simulation-public/issues/2"
+    },
+    "t4": {
+      "observed": "Twelve macro-revision fallback rows omit numeric points and use [0,1] intervals despite explicit original-unit latest estimates and a prompt requesting revised-value forecasts.",
+      "candidate": "Use a valid explicit pre-cutoff estimate as a persistence point with an uncalibrated interval on the original scale; no inference of historical direction from ambiguous vintage stages.",
+      "practice_policy": "The ten public practice units' first-published outcomes may inform all Final tasks under the organizer's exception; record each actual first publication, source and retrieval date, and disclose practice in-sample use.",
+      "practice_policy_source": "https://github.com/Agenthon-2026/track4-analysis-public/issues/24",
+      "policy_date_note": "October 7 is the permission reply date, not the first publication date of the outcomes.",
+      "quality_scope": "Missing sealed naive_answer parameters prevent reproduction of the official composite. Raw locally computed metrics do not establish Final generalization.",
+      "validation": {
+        "focused_and_existing_tests_passed": 143,
+        "skipped": 1,
+        "linux_container_exit_zero": 11,
+        "linux_mode": "Released runtime with read-only candidate fallback.py source overlay; no new release image",
+        "linux_outputs_match_frozen_source_outputs": 11,
+        "official_5_2_2_smoke_admissible": 11,
+        "other_public_outputs_unchanged": 10,
+        "macro_revision_rows_changed": 12,
+        "claims_and_direction_labels_unchanged": true,
+        "candidate_source_sha256": "d9054b6ab666a016db6e59f931af262da16c6586e83492f212d59d64a893c477",
+        "source_comparison": "project-evidence/t4-vintage-e2-20261009/comparison-v2.json",
+        "container_report": "project-evidence/t4-vintage-e2-20261009/linux-v3/container-report.json",
+        "smoke_report": "project-evidence/t4-vintage-e2-20261009/linux-v3/official-smoke.json",
+        "initial_failures_retained": [
+          "Missing numeric point before fix",
+          "Host harness decoded UTF-8 as Windows cp1252",
+          "Smoke script assumed two filesystem parent levels"
+        ],
+        "failure_resolution": "Missing point fixed; UTF-8 explicit; smoke script root path portable. The eleven completed containers were not repeated after the smoke harness fix."
+      },
+      "practice_evaluation": {
+        "report": "verification/t4-revision-practice-20261009.json",
+        "exact_outcomes_available": 10,
+        "exact_outcomes_unavailable_excluded": 2,
+        "rows_with_improved_raw_interval_score": 10,
+        "in_sample": true,
+        "direction_gain_claimed": false,
+        "official_score": null
+      }
+    }
+  },
+  "candidate_status": "LOCAL_VALIDATION_AND_CHATGPT_MATERIALS_REVIEW_COMPLETE",
+  "new_images_published": false,
+  "new_platform_submissions": false,
+  "rank_claim": null,
+  "chatgpt_review": {
+    "task": "c2c_7d2a",
+    "iteration": 2,
+    "scope": "Authorized source and filtered test materials; no independent workspace execution",
+    "t4": "Local implementation/admission accepted",
+    "t1": "Rollback failure swallowing found in first review, causally reproduced, corrected and accepted in second review",
+    "official_results": "Still unknown"
+  }
+}

@@ -45,6 +45,7 @@ def solve(task_dir: Path, out: Path):
     out = prepare_output(task_dir.resolve(), out)
     report = {"schema_version": 2, "status": "running", "stage": "startup", "attempts": [], "events": []}
     client, task, watchdog = None, None, None
+    semantic_errors = ()
     lock = threading.RLock()
 
     def checkpoint(stage=None, **updates):
@@ -68,6 +69,9 @@ def solve(task_dir: Path, out: Path):
 
     def expire():
         try:
+            if report.get("semantic", {}).get("baseline_published"):
+                from .cli import _kill_descendants
+                _kill_descendants(os.getpid())
             # Last checkpoint is always durable even if this write is interrupted.
             checkpoint("deadline", status="timed_out", failure_category="watchdog_deadline")
         finally:
@@ -107,6 +111,7 @@ def solve(task_dir: Path, out: Path):
             raise ValueError("AGENT_MAX_ATTEMPTS must be between 1 and 5")
         work_deadline = deadline - min(15, effective_timeout * .05)
         review_enabled = os.environ.get("AGENT_C3_REVIEW", "0") == "1"
+        semantic_enabled = os.environ.get("AGENT_E1_SEMANTIC", "0") == "1"
         review_used = False
         report["c3"] = {"enabled": review_enabled, "maximum_reviews": 1}
         checkpoint("inspect")
@@ -159,8 +164,29 @@ def solve(task_dir: Path, out: Path):
                 shutil.rmtree(generated_out)
                 output_tree_bytes(out)
                 entry["status"] = "completed"
+                if semantic_enabled:
+                    # The default path is unchanged. Publish a valid baseline
+                    # before starting optional work, which can only replace it
+                    # with a fully executed, structurally valid candidate.
+                    checkpoint("semantic", semantic={"enabled": True, "baseline_published": True},
+                               status="completed_unverified", deliverables=solution["deliverables"])
+                    from .semantic import SemanticRecoveryError, review_candidate
+                    semantic_errors = (SemanticRecoveryError,)
+                    try:
+                        entry["semantic"] = review_candidate(client=client, task=task, out=out,
+                            solution=solution, contract=contract, base_messages=base_messages,
+                            work_deadline=work_deadline, redact=redact)
+                    except semantic_errors:
+                        raise
+                    except Exception as exc:
+                        entry["semantic"] = {"status": "kept", "reason": "optional_setup_failure",
+                                             "error_type": type(exc).__name__, "accepted": False}
                 checkpoint("complete", status="completed_unverified", failure_category=None, deliverables=solution["deliverables"])
                 return out
+            except semantic_errors:
+                # A partial publication with failed rollback must not become
+                # "completed" or enter another ordinary generation attempt.
+                raise
             except Exception as exc:
                 last_error = repair_detail(exc)
                 entry.update(failure_stage=report["stage"], error_type=type(exc).__name__,
@@ -200,6 +226,9 @@ def solve(task_dir: Path, out: Path):
                    failure_category=report.get("failure_category", exc.category if isinstance(exc, ModelError) else report["stage"]))
         raise
     finally:
+        if report.get("semantic", {}).get("baseline_published"):
+            from .cli import _kill_descendants
+            _kill_descendants(os.getpid())
         if watchdog is not None:
             watchdog.cancel()
         checkpoint()

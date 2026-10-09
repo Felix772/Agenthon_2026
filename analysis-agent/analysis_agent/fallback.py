@@ -159,6 +159,51 @@ def _bounded_feature(value):
     return number if math.isfinite(number) and math.isfinite(number * 1.5) else None
 
 
+def _revision_anchor(task, entity, labels, unit):
+    """Recognize an explicit revision-level contract; do not infer release stages.
+
+    A vintage table can contain multiple releases in a month, truncated early
+    vintages, or an annual update. Those columns alone do not identify comparable
+    revision stages. This bounded recovery path therefore uses only the supplied
+    latest estimate. Its band is nominal and uncalibrated, and its direction
+    remains the generic default. The reason is available to local audit callers.
+    """
+    target_words = re.findall(r'[a-z]+', str(task['target'].get('name', '')).casefold())
+    if 'revision' not in target_words or set(labels or ()) != {'up', 'down'}:
+        return None, 'not_revision_level_contract'
+    # A revision classifier may ask for the revised level OR its change. Only
+    # the explicit level instruction admits the latest-estimate anchor.
+    prompt = task.get('prompt')
+    if not isinstance(prompt, str):
+        return None, 'revised_level_not_explicit'
+    level_requests = [sentence for sentence in re.split(r'[.!?;\n]', prompt.casefold())
+        if re.search(r'\bpoint[ _-]+forecast\s+(?:of|for)\s+(?:the\s+)?revised\s+'
+                     r'(?:value|level|estimate)\b', sentence)]
+    if not level_requests or any(re.search(r'\b(?:delta|change|difference|minus|growth|percentage)\b',
+                                          sentence) for sentence in level_requests):
+        return None, 'revised_level_not_explicit'
+    if not isinstance(unit, str) or not unit.strip():
+        return None, 'missing_original_units'
+    series = entity.get('series_id')
+    month = entity.get('ref_month')
+    if (not isinstance(series, str) or not series.strip() or not isinstance(month, str)
+            or not re.fullmatch(r'\d{4}-\d{2}', month)):
+        return None, 'missing_revision_identity'
+    anchor = _bounded_feature(entity.get('latest_precutoff_estimate'))
+    if anchor is None:
+        return None, 'invalid_or_unbounded_latest_estimate'
+    try:
+        reference = calendar_date(month + '-01')
+        vintage = calendar_date(entity.get('latest_precutoff_vintage'))
+        cutoff = calendar_date(task.get('cutoff_date'))
+        resolving = calendar_date(entity.get('resolving_release_date'))
+    except (ContractError, ValueError):
+        return None, 'invalid_revision_dates'
+    if not reference <= vintage <= cutoff < resolving:
+        return None, 'inconsistent_revision_dates'
+    return anchor, 'input_persistence_only_revision_stage_not_inferred'
+
+
 def _emergency_prediction(task, entity, kind, labels, unit):
     """Conservative, outcome-free forecast; model rows always replace this estimate."""
     row = {'entity_id': entity['entity_id']}
@@ -171,6 +216,12 @@ def _emergency_prediction(task, entity, kind, labels, unit):
         row['label'] = next((value for value in ('no_event', 'inline', 'up')
                              if value in labels), labels[0])
         row['interval'] = {'level': .9, 'lo': 0.0, 'hi': 1.0}
+        anchor, _ = _revision_anchor(task, entity, labels, unit)
+        if anchor is not None:
+            width = max(1.0, abs(anchor) * .5)
+            row['point_forecast'] = anchor
+            row['interval'] = {'level': .9, 'lo': anchor - width, 'hi': anchor + width}
+            return row
         consensus = _bounded_feature(entity.get('consensus_eps'))
         if 'eps' in target_name and consensus is not None:
             # EPS classification can still score a numeric EPS interval. The

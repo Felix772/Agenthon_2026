@@ -4,6 +4,7 @@ Audit hooks catch ordinary accidental violations; they are NOT a hostile-code
 sandbox. Use read-only Docker mounts, restricted networking and resource caps.
 """
 import importlib.util
+import json
 import os
 import random
 import resource
@@ -37,6 +38,8 @@ def main():
     np.random.seed(seed % (2**32))
     forbidden = {"reward.json", "pytest_report.json", "reward.txt", "reward", "verifier", "checks", ".agent"}
     sealed = {"checks", "reference", "reference_data", "solution", ".git"}
+    candidate = Path(os.environ["CANDIDATE_DIR"]).resolve() if "CANDIDATE_DIR" in os.environ else None
+    candidate_root = Path(os.environ["CANDIDATE_ROOT"]).resolve() if candidate is not None else None
 
     def check_path(value, writing=False):
         if isinstance(value, int):
@@ -51,6 +54,9 @@ def main():
             parts = path.relative_to(task).parts
             if any(p in sealed for p in parts) or path.name in {"card.toml", "manifest.json"}:
                 raise PermissionError("Generated code cannot read grader or card metadata")
+        elif candidate_root is not None and path.is_relative_to(candidate_root) and not path.is_relative_to(output):
+            if not path.is_relative_to(candidate) or any(part in forbidden for part in path.relative_to(candidate).parts):
+                raise PermissionError("Checker cannot read internal candidate diagnostics")
 
     def audit(event, args):
         if event == "open":
@@ -67,8 +73,32 @@ def main():
         elif event.startswith(("socket.", "subprocess.", "ctypes.")) or event in {"os.system", "os.exec", "os.posix_spawn", "os.fork", "os.forkpty"}:
             raise PermissionError("Generated code may not launch processes or use network/native system calls")
 
+    namespace = {"__name__": "__main__", "__file__": str(script)}
+    checker_ids = json.loads(os.environ["AGENT_CHECKER_IDS"]) if "AGENT_CHECKER_IDS" in os.environ else None
+    results = {}
+    if checker_ids is not None:
+        candidate = Path(os.environ["CANDIDATE_DIR"]).resolve()
+        if candidate == output or candidate.is_relative_to(output):
+            raise ValueError("Checker candidate must be outside writable scratch")
+
+        def check(identifier, passed):
+            if identifier not in checker_ids or identifier in results or not isinstance(passed, (bool, np.bool_)):
+                raise ValueError("Checker must report each declared boolean check exactly once")
+            results[identifier] = bool(passed)
+        namespace["check"] = check
     sys.addaudithook(audit)
-    exec(code, {"__name__": "__main__", "__file__": str(script)})
+    exec(code, namespace)
+    if checker_ids is not None:
+        if set(results) != set(checker_ids):
+            raise ValueError("Checker omitted a declared check")
+        # Separate normal completion from generated stdout. Early exit plus a
+        # printed result is invalid. This is not an unforgeable oracle or a
+        # boundary against hostile Python inspecting its own file descriptors.
+        result_fd = int(sys.argv[3]) if sys.argv[2:3] == ["--checker-result-fd"] else None
+        if result_fd is None:
+            raise ValueError("Checker completion channel is missing")
+        os.write(result_fd, json.dumps(results, sort_keys=True).encode())
+        os.close(result_fd)
 
 
 if __name__ == "__main__":
