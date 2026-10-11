@@ -1,5 +1,6 @@
 *
 !Dockerfile
+!Dockerfile.budget
 !requirements.txt
 !agent/
 !agent/*.py

@@ -1,0 +1,4 @@
+FROM docker.io/felix772/agenthon-2026-t1@sha256:0c8ae4b6b7178633e1c58c023835d83327e916a7073817944120b35d73cacacf
+ENV AGENT_SOFT_TIMEOUT_SEC=360 AGENT_E1_SEMANTIC=0
+RUN python -c "import shutil; shutil.rmtree('/app/agent/__pycache__', ignore_errors=True)"
+COPY agent/*.py /app/agent/

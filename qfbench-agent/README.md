@@ -3,6 +3,32 @@
 A single-agent generate/execute/repair implementation for Agenthon 2026 Track 1.
 See [MODEL-ACCESS.md](MODEL-ACCESS.md) for the current House API contract and access status.
 
+### Local budget candidate (October 11, 2026)
+
+`AGENT_SOFT_TIMEOUT_SEC` remains **360** by default. An explicit value such as `600`
+is an experiment; it is always capped by `[agent].timeout_sec` in the unit's
+`card.toml`. The supervisor reads only that bounded regular metadata file; input
+discovery and numerical imports stay in the supervised child. Both processes use
+the same monotonic start time, so child startup cannot renew the allowance.
+
+The selected ceiling includes publication time (up to 15 seconds), a one-second
+gap between the child and parent watchdogs, and up to eight seconds for exit and
+recovery. At the default 360-second cap this leaves 336 seconds for discovery,
+generation and execution, compared with the previous 345-second work window.
+At an explicit 600-second cap the work window is 576 seconds. The reserves shrink
+for very short cards. They leave cleanup room but cannot guarantee host scheduling
+or filesystem latency. Image pulling and container creation happen before this
+CLI clock and also consume the organizer's limits.
+For a 10-second synthetic card the exit reserve is only 0.5 seconds, while existing
+cleanup waits can take two seconds; short-card cleanup is therefore best effort.
+The real CLI candidate checks use the published 600–2400-second card range.
+
+The local evaluator adds a separately reported 15-second Docker launch allowance;
+it does not grant the submission extra card time. Its roster worksheet is for
+Development. Final units have 600–2400 seconds each and share a 24-hour run limit;
+the Final roster size and remaining stage time are unavailable. A larger cap has
+not yet demonstrated a House solve-rate improvement. E1 remains disabled by default.
+
 ### Local E1 experiment (October 9, 2026)
 
 `AGENT_E1_SEMANTIC` defaults to `0`. This experiment is disabled in production and
@@ -11,7 +37,8 @@ only for an explicit local experiment. After the core solver publishes structura
 valid deliverables, E1 requires at least 155 seconds of remaining work time and two
 remaining request slots. It can generate one independent checker through the House
 route, then make at most one repair request. The same checker is reused on the repair.
-The existing 360-second solve cap and 25-request allowance remain unchanged.
+The default 360-second solve cap and 25-request allowance remain unchanged; the
+budget candidate above now shares startup and reserve accounting between processes.
 
 Checks must quote an explicit instruction requirement and compute from runtime
 inputs. The checker receives no solver source, cannot write the candidate, and runs

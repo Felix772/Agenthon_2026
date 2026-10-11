@@ -1,0 +1,27 @@
+# Patch the submitted entrypoint only; local experimental profiles are not copied.
+FROM docker.io/felix772/agenthon-2026-t2@sha256:461ad3fb69becc4084744879ba8f9bf53ae7e4de64f49785f14fae3a217aa8a3
+USER 0
+RUN python - <<'PY'
+import hashlib
+from pathlib import Path
+
+path = Path('/app/forecast.py')
+original = path.read_bytes()
+if hashlib.sha256(original).hexdigest() != '89e5f36b736c8df73a8190af9922eb9fb29569354bbe1ec84b74a34e907c56e5':
+    raise RuntimeError('Unexpected published forecasting entrypoint')
+source = original.decode('utf-8')
+replacements = [
+    ("    parser.add_argument('--n-draws', type=int, default=500)",
+     "    parser.add_argument('--n-draws', type=int)"),
+    ("    if not floor <= args.n_draws <= ParseLimits().max_draws:",
+     "    if args.n_draws is None:\n        args.n_draws = max(500, floor)\n"
+     "    if not floor <= args.n_draws <= ParseLimits().max_draws:"),
+]
+for old, new in replacements:
+    if source.count(old) != 1:
+        raise RuntimeError('Draw-count patch must match exactly once')
+    source = source.replace(old, new, 1)
+path.write_bytes(source.encode('utf-8'))
+print('Patched entrypoint SHA256:', hashlib.sha256(path.read_bytes()).hexdigest())
+PY
+USER 65534:65534

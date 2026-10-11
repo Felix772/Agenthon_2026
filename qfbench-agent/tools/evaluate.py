@@ -6,14 +6,18 @@ Only the verifier can see public checks. No changes to public units are made.
 import argparse
 from datetime import datetime, timezone
 import json
-import math
 import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import time
 import tomllib
 import uuid
+
+# Keep direct `python tools/evaluate.py` execution usable from any directory.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from agent.budget import DEFAULT_CAP, LOCAL_DOCKER_LAUNCH_ALLOWANCE, budget_for, configured_cap, timeout_from_card
 
 EXCLUDED = {"checks", "reference", "reference_data", "solution", ".git", ".venv", "__pycache__"}
 MODEL_ENV = ("MODEL_ENDPOINT", "MODEL_NAME", "MODEL_TOKEN", "HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY", "http_proxy", "https_proxy", "no_proxy", "QFBENCH_NETWORK", "QFBENCH_SEED", "AGENT_MAX_ATTEMPTS", "AGENT_SOFT_TIMEOUT_SEC")
@@ -74,22 +78,22 @@ def run_container(command, name, timeout, log):
     return evidence
 
 
-def budget_worksheet(units, soft_timeout=360):
-    if not math.isfinite(soft_timeout) or soft_timeout <= 0:
-        raise ValueError("Soft timeout must be positive and finite")
+def budget_worksheet(units, soft_timeout=DEFAULT_CAP):
+    budget_for(soft_timeout, soft_timeout)
     rows = []
     for unit in units:
         card = tomllib.loads((unit / "card.toml").read_text(encoding="utf-8"))
-        timeout = float(card["agent"]["timeout_sec"])
-        if not math.isfinite(timeout) or timeout <= 0:
-            raise ValueError("Invalid task timeout")
-        rows.append({"task": unit.name, "card_timeout_sec": timeout, "solve_cap_sec": min(soft_timeout, timeout)})
+        timeout = timeout_from_card(card)
+        budget = budget_for(timeout, soft_timeout)
+        rows.append({"task": unit.name, "card_timeout_sec": timeout, "solve_cap_sec": budget.ceiling,
+                     "work_budget_sec": budget.work_deadline(0), "publication_reserve_sec": budget.publication_reserve,
+                     "exit_reserve_sec": budget.exit_reserve, "watchdog_gap_sec": budget.watchdog_gap})
     total = sum(row["solve_cap_sec"] for row in rows)
     return {"units": rows, "solve_cap_sum_sec": total, "internal_solve_target_sec": 34560,
             "within_internal_solve_target": total <= 34560, "ingestion_limit_sec": 43200,
-            "cap_enforcement": "CLI parent-process watchdog; child card timer and 15s publication reserve at 360s",
-            "parent_reaping_grace_sec_per_unit": 2,
-            "max_roster_reaping_grace_sec": 2 * len(rows),
+            "scope": "Development local roster worksheet; not a Final stage budget or timing guarantee",
+            "cap_enforcement": "Parent and child share the CLI start; card/configuration ceiling includes publication and exit reserves",
+            "local_docker_launch_allowance_sec": LOCAL_DOCKER_LAUNCH_ALLOWANCE,
             "setup_pull_ingestion_overhead_sec": None, "safety_reserve_sec": None,
             "release_gate": "observed solve sum + measured setup/pull/ingestion overhead + safety reserve <= 43200",
             "release_gate_status": "unmeasured; worksheet is not a runtime validation"}
@@ -156,7 +160,8 @@ def main():
                 "public_commit": subprocess.check_output(["git", "-c", f"safe.directory={public.as_posix()}", "-C", str(public), "rev-parse", "HEAD"], text=True).strip()}
     (results / "environment.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
     roster = sorted(p for p in units_root.iterdir() if p.is_dir() and (p / "card.toml").is_file())
-    worksheet = budget_worksheet(roster, float(os.environ.get("AGENT_SOFT_TIMEOUT_SEC", "360")))
+    cap = configured_cap()
+    worksheet = budget_worksheet(roster, cap)
     (results / "budget-worksheet.json").write_text(json.dumps(worksheet, indent=2), encoding="utf-8")
     records = []
     for index, unit in enumerate(units):
@@ -169,9 +174,7 @@ def main():
         ingestion_started = time.monotonic()
         try:
             card = tomllib.loads((unit / "card.toml").read_text(encoding="utf-8"))
-            timeout = float(card["agent"]["timeout_sec"])
-            if not math.isfinite(timeout) or timeout <= 0:
-                raise ValueError("Invalid task timeout")
+            budget = budget_for(timeout_from_card(card), cap)
             stage_input(unit, run / "input")
             name = "qfagent-" + uuid.uuid4().hex[:12]
             command = ["docker", "run", "--rm", "--name", name, "--network", args.network,
@@ -181,7 +184,9 @@ def main():
                     command += ["-e", key]
             command += mount(run / "input", "/input", True) + mount(output, "/app/output") + mount(output, "/output")
             command += [image_info["Id"], "solve", "--task-dir", "/input", "--out", "/app/output"]
-            local_ceiling = min(timeout, float(os.environ.get("AGENT_SOFT_TIMEOUT_SEC", "360"))) + 15
+            # Local Docker startup overhead is separate from the CLI's shared
+            # clock; this is not extra time granted by the organizer's card.
+            local_ceiling = budget.ceiling + LOCAL_DOCKER_LAUNCH_ALLOWANCE
             record["agent"] = run_container(command, name, local_ceiling, run / "agent.log")
             record["local_ingestion_sec"] = round(time.monotonic() - ingestion_started, 3)
             record["output_bytes"] = output_tree_size(output)

@@ -1,12 +1,12 @@
 import argparse
 import json
-import math
 import os
 import signal
 import subprocess
 import sys
 import time
 from pathlib import Path
+from .budget import budget_for, configured_cap, read_card_timeout
 
 def _kill_descendants(pid):
     """Kill only descendants of this invocation, including separate worker groups."""
@@ -152,19 +152,19 @@ def main(argv=None):
     command.add_argument("--task-dir", type=Path, required=True)
     command.add_argument("--out", type=Path, required=True)
     command.add_argument("--internal-worker", action="store_true", help=argparse.SUPPRESS)
+    command.add_argument("--internal-started", type=float, help=argparse.SUPPRESS)
     command.add_argument("--internal-output-fd", type=int, help=argparse.SUPPRESS)
     command.add_argument("--internal-semantic-fd", type=int, help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
     print(json.dumps({"event": "agent_startup", "schema_version": 2}), file=sys.stderr, flush=True)
     try:
         if not args.internal_worker:
-            timeout = float(os.environ.get("AGENT_SOFT_TIMEOUT_SEC", "360"))
-            if not math.isfinite(timeout) or timeout <= 0:
-                raise ValueError("AGENT_SOFT_TIMEOUT_SEC must be positive and finite")
+            cap = configured_cap()
+            budget = budget_for(read_card_timeout(args.task_dir), cap)
             command = [sys.executable, "-m", "agent", "solve", "--task-dir", str(args.task_dir),
-                       "--out", str(args.out), "--internal-worker"]
+                       "--out", str(args.out), "--internal-worker", "--internal-started", repr(started)]
             if os.name != "posix":
-                return run_guarded(command, args.out, started + timeout)
+                return run_guarded(command, args.out, budget.parent_deadline(started))
             read_fd, write_fd = os.pipe()
             command.extend(["--internal-output-fd", str(write_fd)])
             semantic_read = semantic_write = None
@@ -173,7 +173,7 @@ def main(argv=None):
                 command.extend(["--internal-semantic-fd", str(semantic_write)])
             try:
                 descriptors = (write_fd,) if semantic_write is None else (write_fd, semantic_write)
-                return run_guarded(command, args.out, started + timeout, pass_fds=descriptors,
+                return run_guarded(command, args.out, budget.parent_deadline(started), pass_fds=descriptors,
                                    semantic_fallback_fd=semantic_read)
             finally:
                 if semantic_read is not None:
@@ -202,7 +202,7 @@ def main(argv=None):
             from . import semantic
             semantic._fallback_fd = args.internal_semantic_fd
         from .solver import solve
-        solve(args.task_dir, args.out)
+        solve(args.task_dir, args.out, started=args.internal_started if args.internal_started is not None else started)
     except Exception as exc:
         print(json.dumps({"event": "agent_failed", "error_type": type(exc).__name__,
                           "diagnostics": ".agent/run.json"}), file=sys.stderr, flush=True)

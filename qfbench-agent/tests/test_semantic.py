@@ -439,7 +439,9 @@ class SemanticLinuxTests(unittest.TestCase):
                     with patch.dict(os.environ, env):
                         code = run_guarded(command, out, time.monotonic() + 7,
                                            pass_fds=(write_fd,), semantic_fallback_fd=read_fd)
-                    self.assertTrue(seen.is_set(), "The optional House call must actually have started")
+                    diagnostics = out / ".agent/run.json"
+                    self.assertTrue(seen.is_set(), "The optional House call must actually have started; " +
+                                    (diagnostics.read_text() if diagnostics.is_file() else "no run report"))
                     self.assertEqual(code, 0)
                     self.assertEqual(json.loads(out.joinpath("results.json").read_text()), GOOD)
                     self.assertTrue(out.joinpath(".agent/semantic-fallback.json").is_file())

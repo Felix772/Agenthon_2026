@@ -1,0 +1,113 @@
+{
+  "date": "2026-10-11",
+  "task": "c2c_1011",
+  "status": "LOCAL_IMPLEMENTATION_AND_VALIDATION_DONE",
+  "base_commit": "d7d0f19823cf9c7414b8c6102f6b8edbe2931eab",
+  "upstream": {
+    "method": "Fresh live git ls-remote plus fixed-HEAD README, AGENTS, CONTRIBUTING, SUBMISSION_CLI and applicable linked contracts; latest official issues inspected.",
+    "heads": {
+      "Agenthon2026-public": "c817c36780aba74e9caeb8d86167103b66b779f1",
+      "track1-coding-public": "9de1be4fbd50e0cc03b5ae53cfb115ee23b76f8a",
+      "track2-forecasting-public": "a2c93e7b66b8c6a6c429fda81d6bc7873b7c5dec",
+      "track3-simulation-public": "1d7e994761f2e9256dd0c572c3592422c8fd0914",
+      "track4-analysis-public": "5d3b726a49b8ea218543e4d24319895874dcff6e"
+    },
+    "toolkit": "2.6.0",
+    "analysis_scorer": "5.3.0"
+  },
+  "official_results": {
+    "status": "UNKNOWN",
+    "submissions": {
+      "t1": 972771,
+      "t2": 972754,
+      "t3": 972772,
+      "t4": 972773
+    },
+    "reason": "Saved browser permission denied CodaBench again. No alternate surface or API used. User does not have result details."
+  },
+  "new_rules": {
+    "limits_source": "https://github.com/Agenthon-2026/Agenthon2026-public/issues/2#issuecomment-6099955125",
+    "complete_run_sec": 86400,
+    "t1_unit_sec": [
+      600,
+      2400
+    ],
+    "t2_unit_sec": 1800,
+    "t3_invocation_sec": 300,
+    "t3_warmup": 1,
+    "t3_counted_invocations": 4,
+    "t4_unit_sec": 600,
+    "house": {
+      "requests": 25,
+      "max_output_tokens": 4000,
+      "context_tokens": 262144
+    },
+    "development_latest_start_utc": "2026-10-12T20:00:00Z",
+    "final_upload_open_utc": "2026-10-13T12:00:00Z",
+    "final_upload_close_utc": "2026-10-26T11:59:00Z",
+    "image_policy": "Anonymous linux/amd64 immutable digest, interface2.0, no VOLUME; keep image available through results publication.",
+    "t1_confirmed_upstream_issues": "https://github.com/Agenthon-2026/track1-coding-public/issues/32#issuecomment-6100071131",
+    "t1_issue_summary": "Organizer acknowledges instruction/checker mismatches and unspecified conventions across 12 units; new HEAD has documentation changes only. Do not optimize to hidden or defective answers.",
+    "t2_final_source": "https://github.com/Agenthon-2026/track2-forecasting-public/issues/4",
+    "t2_final_ranking": {
+      "input_cutoff": "2026-10-23",
+      "universe": [
+        "UST",
+        "G10 FX"
+      ],
+      "families": [
+        "F1",
+        "F2",
+        "F3",
+        "F4"
+      ],
+      "horizons_business_days": [
+        2,
+        12
+      ],
+      "target_dates": [
+        "2026-10-27",
+        "2026-11-10"
+      ],
+      "results_date": "2026-11-13",
+      "sealed_window_run": "unranked check"
+    },
+    "t4_switch_source": "https://github.com/Agenthon-2026/track4-analysis-public/issues/2",
+    "t4_switch_utc": "2026-10-09T22:11:00Z",
+    "t4_current_rules": "Development and Final enforce NLI contradiction>0.9; exact quotations exempt from NLI; 400 tokenizer tokens per claim; only first20 claims/entity counted, all claims still subject to schema/cutoff checks.",
+    "t4_ranking_note": "Only uploads after the scorer switch are ranked on the new board. Submission972773 predates switch.",
+    "t4_selection_source": "https://github.com/Agenthon-2026/track4-analysis-public/issues/24",
+    "t4_selection_policy": "Only the ten official practice first-published outcomes have the stated cross-cutoff selection exception; other post-cutoff retrospective outcomes cannot select even source-code variants."
+  },
+  "validation_reports": {
+    "t1": "verification/t1-budget-20261011.json",
+    "t2": "verification/t2-contract-20261011.json",
+    "t3": "verification/t3-resources-20261011.json",
+    "t4": "verification/t4-scorer530-20261011.json"
+  },
+  "environment_repair": {
+    "docker_initial_failure": "Two orphan zero-byte AF_UNIX socket files prevented Docker Desktop startup.",
+    "recovery": "Verified stopped backend and directories containing only the zero-byte socket; renamed those exact directories to sibling backups and restarted Docker. No image reset, credential reading, or permission widening.",
+    "backups": [
+      "C:/Users/felix/AppData/Local/docker-secrets-engine.stale-20261011153130",
+      "C:/Users/felix/AppData/Local/Docker/run.stale-20261011153306"
+    ],
+    "server_after_repair": "29.4.2"
+  },
+  "chatgpt": {
+    "task": "c2c_1011",
+    "mode": "Previously authorized original conversation; filtered materials review. Live workspace connector returns Internal error.",
+    "plan_received": true,
+    "review_complete": true,
+    "review_state": "DONE",
+    "conversation": "https://chatgpt.com/g/g-p-6ab1634500348191967c38123bc3c2dc-agenthon-2026/c/6abdb060-20b4-83e9-a25f-8661e5b6a32e",
+    "review_basis": "Authorized supplied source, exact image identities and filtered success/failure logs; no independent live workspace read. No remaining definite code-level blocker identified within this bounded local scope.",
+    "execution_records": "Both successful and failed validation outputs recorded for task c2c_1011 iteration1; raw logs retained locally.",
+    "scope": "Bounded local implementation and validation; no score guarantee.",
+    "permission_configuration": "Automatic review rejected persistent Codex permission changes. No retry or indirect configuration modification. Existing authorized conversation messaging and individually approved local record writes used."
+  },
+  "new_images_published": false,
+  "new_platform_submissions": false,
+  "rank_claim": null,
+  "quality_gain_claim": null
+}

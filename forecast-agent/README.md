@@ -10,7 +10,31 @@ Run with the isolated Python 3.13 environment containing toolkit 2.4.4 and the o
 
 The card and optional forecast_spec.json must be beside panels/. Asset/horizon keys remain in card order. Monthly sampling steps use the official explicit-period helper; horizon integers are never converted by a calendar heuristic. Output validation rejects incomplete or duplicate grids, non-finite values, invalid metadata and missing rationale. The official scorer remains authoritative.
 
-Outputs are forecast.parquet, forecast_meta.json and forecast_rationale.md. Existing outputs are not overwritten. Official source checkouts remain unchanged. Text retrieval is implemented below; live event extraction and platform submission remain later tasks. The participant image passes local strict runtime and full-roster contract checks; these establish no prediction accuracy score.
+Without `--n-draws`, the agent uses the greater of 500 and the minimum declared
+by the card or forecast specification. Explicit draw counts must satisfy both
+minimums and the official 20,000-draw maximum. The optional daily reference,
+online-selection and M0-control profiles still require exactly 500 draws and
+reject a higher declared minimum. This contract handling does not change the
+sampling algorithm or establish forecast quality.
+
+`Dockerfile.draw-floor` applies that same small contract fix to the published
+monthly-trend image at its fixed digest. It checks the original entrypoint's
+complete SHA256 and each replacement before patching. The image keeps the
+published entrypoint's supported methods; it does not copy this checkout's
+later experimental daily profiles or their helper modules.
+
+Outputs are forecast.parquet, forecast_meta.json and forecast_rationale.md. Existing outputs are not overwritten. Official source checkouts remain unchanged. Text retrieval is implemented below; live event extraction remains a later task.
+
+The published monthly-trend image at digest
+`sha256:461ad3fb69becc4084744879ba8f9bf53ae7e4de64f49785f14fae3a217aa8a3`
+passed all 104 public container and contract checks on October 9 and was submitted
+as Development run `972754`; its current official result is unavailable.
+The October 11 draw-floor candidate passed 11 forecast invocations in its main
+local container suite. Three additional boundary cases produced one valid
+2,000-draw forecast and the two expected refusals. This candidate remains local;
+its validation scope and image ID are recorded in
+`../verification/t2-contract-20261011.json`. These checks establish contract
+compatibility and provide no prediction accuracy score.
 
 T2-05A now audits the staged corpus_index.json, filters by public-release timestamp,
 and records lexical hits and source offsets in the rationale. Default forecasts

@@ -1,0 +1,159 @@
+{
+  "date": "2026-10-11",
+  "scope": "Final local image tests and scorer 5.3.0 compatibility; no publication or submission",
+  "upstream": {
+    "repository": "https://github.com/Agenthon-2026/track4-analysis-public",
+    "head": "5d3b726a49b8ea218543e4d24319895874dcff6e",
+    "scorer": "5.3.0",
+    "development_switch_utc": "2026-10-09T22:11:00Z",
+    "weekly_updates": "https://github.com/Agenthon-2026/track4-analysis-public/issues/2",
+    "final_limits": "https://github.com/Agenthon-2026/Agenthon2026-public/issues/2",
+    "practice_and_selection_policy": "https://github.com/Agenthon-2026/track4-analysis-public/issues/24"
+  },
+  "image": {
+    "tag": "agenthon-t4:revision-scorer530-20261011",
+    "local_image_id": "sha256:da6cfced0fb7b16d2cb5f9b3dbde63ba8387c63b7d2f9711b84d2475f68deb82",
+    "base_public_digest": "docker.io/felix772/agenthon-2026-t4@sha256:c1fef9efaac99c1585f076397097bacd9acbd507ee773097ac3f2f4b5ef7de76",
+    "source_commit": "d7d0f19823cf9c7414b8c6102f6b8edbe2931eab",
+    "fallback_sha256": "d9054b6ab666a016db6e59f931af262da16c6586e83492f212d59d64a893c477",
+    "runtime_toolkit": "2.5.1",
+    "runtime_layers_unchanged": true,
+    "base_layers": 20,
+    "candidate_layers": 21,
+    "new_neural_weights": false,
+    "published": false
+  },
+  "validation": {
+    "final_image_public_containers_passed": 11,
+    "participant_source_overlays": false,
+    "answers_equal_previously_validated_candidate": 11,
+    "cross_uid_answer_files_readable": 11,
+    "regression_tests_passed": 160,
+    "regression_source": "analysis-agent/tests/{test_vintage_fallback,test_pipeline,test_recovery,test_reasons,test_entity_ownership,test_reliability}.py",
+    "independent_scorer_smoke_passed": 11,
+    "independent_scorer_toolkit": "2.6.0",
+    "deterministic_claim_rules_passed": true,
+    "claims": 78,
+    "exact_quotes": 78,
+    "max_tokens_over_two_published_tokenizers": 115,
+    "claims_per_entity_max": 1,
+    "claim_penalty_preview_factors": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "control_checks": {
+      "claims_after_20_ignored": {
+        "refused": false,
+        "claims": 20,
+        "false": 0,
+        "entities": 1,
+        "factor": 1.0,
+        "ignored": 1
+      },
+      "counted_false_claim": {
+        "refused": false,
+        "claims": 20,
+        "false": 1,
+        "entities": 1,
+        "factor": 0.75,
+        "ignored": 1
+      },
+      "ignored_invalid_citation_refused": true,
+      "over_400_tokens_refused": true
+    },
+    "synthetic_slow_house": {
+      "passed": true,
+      "exit_code": 0,
+      "container_process_duration_sec": 42.209033,
+      "original_answer_preserved": true,
+      "requests": 1,
+      "worker_disconnected": true,
+      "oom_killed": false
+    }
+  },
+  "published_model_tokenizers_available": true,
+  "production_judge_revision": "UNKNOWN",
+  "tokenizers": {
+    "members": [
+      {
+        "model": "cross-encoder/nli-deberta-v3-large",
+        "revision": "bab4bc7178836f731dcfd18c06ca9def0a137712",
+        "files": {
+          "config.json": "30d88fd93586a85330162d169f68161aecc242e1be23dc41db335c069fbbab8f",
+          "special_tokens_map.json": "ed7c099c988dbb414b18a6980d20cb57b91b7cd119f6f6941eb364b0e892e712",
+          "spm.model": "c679fbf93643d19aab7ee10c0b99e460bdbc02fedf34b92b05af343b4af586fd",
+          "tokenizer.json": "5124ef2ead1a10a717703bc436de7f353da76d6340e4587719b42b1693707964",
+          "tokenizer_config.json": "f3eecd07c370ef0bf7dd3780d3cd68cf9c8b00c267e21a208ddcd8f82bfec1a6"
+        }
+      },
+      {
+        "model": "MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli",
+        "revision": "b3546ea6b0346eb6f8d5d68b13c7dc6d0376b3d7",
+        "files": {
+          "config.json": "7f9d420b616691c5b575bab8839719aefbddc656d8e1316519414b097ce43e3d",
+          "special_tokens_map.json": "fcfbeb4e25cd37fb5b8030406394253b245230fd3b552750092bab7d24d827da",
+          "spm.model": "c679fbf93643d19aab7ee10c0b99e460bdbc02fedf34b92b05af343b4af586fd",
+          "tokenizer.json": "7aa118770f066a74530d161c7d0b994d0629cc0ff3a0df213f184192773f960a",
+          "tokenizer_config.json": "556a192d83e3edb45a09a6207095dd9295c3b2279062e5cc430feac4cb7a0817"
+        }
+      }
+    ],
+    "versions": {
+      "transformers": "4.57.1",
+      "tokenizers": "0.22.2",
+      "sentencepiece": "0.2.1"
+    },
+    "method": "AutoTokenizer, use_fast=True, add_special_tokens=False; maximum over two published members",
+    "neural_weights_downloaded": false
+  },
+  "production_nli_forward_pass": false,
+  "real_house_calls": 0,
+  "official_score": null,
+  "rank": null,
+  "limitations": [
+    "Public-model tokenizer counts are exact for the recorded revisions; the organizer deployment revision match is unknown.",
+    "Exact quoted claims follow the official contradiction exemption; no learned NLI forward pass or production runtime was tested.",
+    "Smoke admission and local raw practice metrics do not establish predictive quality on hidden tasks.",
+    "Ten exposed-practice archived outcomes remain in-sample evidence; this round makes no new interval or direction calibration.",
+    "The 972773 submission predates the 5.3.0 upload threshold and cannot establish a score on the reset board."
+  ],
+  "initial_harness_failures_retained": [
+    {
+      "path": ".validation\\t4-scorer-5.3.0-20261011\\compatibility.log",
+      "failure": "Official corpus loader uses os.O_DIRECTORY unavailable on Windows; rerun on Linux."
+    },
+    {
+      "path": ".validation\\t4-scorer-5.3.0-20261011\\regression-linux-initial-deps.log",
+      "failure": "Read-only pytest test dependency mount omitted py.py shim; test-only shim added."
+    },
+    {
+      "path": ".validation\\t4-scorer-5.3.0-20261011\\compatibility-linux-initial-control.log",
+      "failure": "Long negative-control claim is stripped by official alignment, so precomputed token table lacked normalized text; table now includes official NFC/strip forms. Actual 11-unit checks already passed before that negative control."
+    }
+  ],
+  "evidence_sha256": {
+    ".validation/t4-scorer-5.3.0-20261011/upstream.zip": "520fc1b91cfcba799de1c3795f189783b9d011ef198bbcc699fced0965af5d6a",
+    ".validation/t4-scorer-5.3.0-20261011/build.log": "7f8fb0afb4a6856ff01446e204cfa84ea8627e744da90514d5c6c82190489bde",
+    ".validation/t4-scorer-5.3.0-20261011/candidate-report.json": "57c39ee3d7d5163b2efb2b865a5bc7f6994f6e6c3e56527d25aeb8d04519b22f",
+    ".validation/t4-scorer-5.3.0-20261011/compatibility-report.json": "4ac662f3aa6ed2ea8988cd16f8cffba42695ddf43a9f80e84b3a92b04b368652",
+    ".validation/t4-scorer-5.3.0-20261011/compatibility-linux.log": "624f655863efd4327aea16dbdc8bbcba879d32ea8789ac0927e4316983bcce26",
+    ".validation/t4-scorer-5.3.0-20261011/regression-linux.log": "1a45ee6d43c3958d8cd299294fea3e9c141f063598c4c61d369e76c62db0f052",
+    ".validation/t4-scorer-5.3.0-20261011/slow-final/report.json": "ab52c690bc6bec00b35dc76b2c7087de33f494caa71d9508430f5bc083144fa3",
+    ".validation/t4-scorer-5.3.0-20261011/slow-final.log": "a1aa0b556549a462888d5084549315a26d5b715d6eaec2f8a25181bed7d17b97",
+    ".validation/t4-scorer-5.3.0-20261011/compatibility.log": "bfdcd304cf727f13614850b2eddb1c5e0e9a37ec9e796bc0d5e36f0cb625e7e7",
+    ".validation/t4-scorer-5.3.0-20261011/compatibility-linux-initial-control.log": "b6fb345918e2f9fa9d76eb64cd3de2cce901ee3452128fc95b08b2c1e6e350ad",
+    ".validation/t4-scorer-5.3.0-20261011/regression-linux-initial-deps.log": "ba4ba5e51681750064ea8d8c3e83db20ab195f51ea57ac00c49c8643481d3ffe",
+    ".validation/t4-tokenizers-20261011/token-counts.json": "e1832276c9f7b18a6b41629c7fe8996cf1dfb06c816fa1b76ceb934a6f60be9a",
+    "analysis-agent/Dockerfile.revision": "0e48dc625e5aabd5714061db91c079f8d1ee29ccb0011a5d26cefe9ef499e9ee",
+    "analysis-agent/analysis_agent/fallback.py": "d9054b6ab666a016db6e59f931af262da16c6586e83492f212d59d64a893c477"
+  }
+}

@@ -10,6 +10,7 @@ import zipfile
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
+from .budget import timeout_from_card
 
 SEALED = {"checks", "reference", "reference_data", "solution", ".git", ".venv", "__pycache__"}
 INSPECTION_PROMPT_LIMIT = 6000
@@ -47,9 +48,7 @@ def read_task(task_dir: Path):
         raise ValueError("Instruction or card exceeds supported size")
     instruction = instruction_path.read_text(encoding="utf-8")
     card = tomllib.loads(card_path.read_text(encoding="utf-8"))
-    timeout = card.get("agent", {}).get("timeout_sec")
-    if type(timeout) not in (float, int) or not math.isfinite(timeout) or timeout <= 0:
-        raise ValueError("card.toml must provide a positive [agent].timeout_sec")
+    timeout = timeout_from_card(card)
     canary = card.get("contamination", {}).get("canary_guid", "")
     if not isinstance(canary, str):
         raise ValueError("Invalid card canary metadata")

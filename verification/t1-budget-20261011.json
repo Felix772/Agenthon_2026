@@ -1,0 +1,272 @@
+{
+  "date": "2026-10-11",
+  "status": "local bounded candidate verified; not submitted or published",
+  "workspace_head_before_changes": "d7d0f19823cf9c7414b8c6102f6b8edbe2931eab",
+  "rules": {
+    "shared_live_head": "c817c36780aba74e9caeb8d86167103b66b779f1",
+    "t1_live_head": "9de1be4fbd50e0cc03b5ae53cfb115ee23b76f8a",
+    "all_five_required_repositories_consulted": true,
+    "other_three_tracks": "Parent and peer documentation audits completed before implementation",
+    "final_card_seconds": [
+      600,
+      2400
+    ],
+    "final_stage_seconds": 86400,
+    "announcement": "https://github.com/Agenthon-2026/Agenthon2026-public/issues/2#issuecomment-6099955125",
+    "deadline_source": "https://github.com/Agenthon-2026/Agenthon2026-public/issues/9#issuecomment-6103653817",
+    "development_must_start_before_utc": "2026-10-12T20:00:00Z",
+    "final_opens_utc": "2026-10-13T12:00:00Z",
+    "final_upload_closes_utc": "2026-10-26T11:59:00Z",
+    "known_checker_mismatch": "https://github.com/Agenthon-2026/track1-coding-public/issues/32#issuecomment-6100071131"
+  },
+  "budget": {
+    "sources": [
+      "/input/card.toml [agent].timeout_sec",
+      "explicit AGENT_SOFT_TIMEOUT_SEC"
+    ],
+    "default_cap_seconds": 360,
+    "candidate_explicit_cap_seconds": 600,
+    "ceiling": "min(valid card timeout, valid configured cap)",
+    "clock": "one monotonic origin passed from CLI parent to guarded child",
+    "supervisor_metadata_read": "Only bounded 256000-byte regular card; lstat, O_NOFOLLOW/O_NONBLOCK, fstat identity and size gates. No input traversal or numerical imports moved to parent.",
+    "missing_invalid_metadata": "fail closed; no guessed phase, roster or stage deadline",
+    "reserves": {
+      "exit": "min(8, ceiling * 0.05)",
+      "watchdog_gap": "min(1, ceiling * 0.01)",
+      "publication": "min(15, ceiling * 0.05)"
+    },
+    "at_default_360": {
+      "parent_deadline_from_start": 352,
+      "child_deadline_from_start": 351,
+      "work_deadline_from_start": 336,
+      "previous_work_window_seconds": 345
+    },
+    "at_explicit_600": {
+      "parent_deadline_from_start": 592,
+      "child_deadline_from_start": 591,
+      "work_deadline_from_start": 576
+    },
+    "local_evaluator_docker_launch_allowance_seconds": 15,
+    "evaluator_scope": "Development local roster worksheet only; separate local launcher allowance is not organizer-granted card time",
+    "e1_default": false,
+    "house_requests_max": 25,
+    "house_max_output_tokens": 4000
+  },
+  "image": {
+    "local_tag": "agenthon-t1:budget-20261011",
+    "id": "sha256:687a7c546639a46906615ae8377388daca49ede19d048f49764b0ed9569fe043",
+    "fixed_base": "docker.io/felix772/agenthon-2026-t1@sha256:0c8ae4b6b7178633e1c58c023835d83327e916a7073817944120b35d73cacacf",
+    "architecture": "amd64",
+    "os": "linux",
+    "interface_label": "2.0",
+    "volumes": null,
+    "entrypoint": [
+      "python",
+      "-m",
+      "agent"
+    ],
+    "dockerfile": "qfbench-agent/Dockerfile.budget",
+    "context": "project-evidence/t1-budget-20261011/build-context; only Dockerfile.budget and agent/*.py",
+    "build_command": "docker build --pull=false --network=none --platform linux/amd64 -f project-evidence/t1-budget-20261011/build-context/Dockerfile.budget -t agenthon-t1:budget-20261011 project-evidence/t1-budget-20261011/build-context",
+    "context_recipe": "Create a fresh directory with agent/; copy qfbench-agent/Dockerfile.budget and qfbench-agent/agent/*.py only, preserving those relative paths; use the recorded Docker build command with this directory.",
+    "bytecode": "Inherited /app/agent/__pycache__ removed; COPY agent/*.py excludes local bytecode; final image has no agent .pyc files",
+    "source_binding": {
+      "default_cap": 360.0,
+      "default_e1": "0",
+      "exact_match": true,
+      "expected_source_sha256": {
+        "__init__.py": "958a18fc03b9646e92634529963bc846bfb20c3ee204d89df828c4e51dc763fb",
+        "__main__.py": "935a1c1166b0c1ea35a82256345000bf2c73ded718d77773bc27a71ecce28f7d",
+        "budget.py": "520d59fb34dcd9a658286b34c047556ed1d5d6aeef57254d955432dbd178095f",
+        "cli.py": "538dc56f259dc211cf30035d2fe116081cdad19a646b09cd6a0313ac6e1ebd24",
+        "contracts.py": "7f36d7e44cc1fc060f3470ff3092b78496de35aa6b0371a67ab653f506d65b46",
+        "execution.py": "e77ace3438715bf9e0b178f2f1cc2fa0eec0ab9dee03f3525d853f011fcd2f35",
+        "model_client.py": "3c3242753ce2e62b51cd35f8baae3cebe76f667fe8a06f260f2573d721564627",
+        "prompts.py": "b285dc1ff81335e52c1a9c6d14ccce5d0eb7236cbaa6278a3be6d1635d3e5324",
+        "review.py": "f47294d01bddfabcfca9c38c285752258bddfc7634ab6af13cdc09a4763a07e1",
+        "semantic.py": "1201c46d994f0ff505e2a293d9d82b9e8d8fea220c1eef641ed529495ae29250",
+        "solver.py": "a2feff3431b1581a89ab48519fab30c71220337de6bf5715555e73fdcec87b08",
+        "task_reader.py": "920a67567f0e25a2d9886567ab16b58107325d38b8f197fca9400b87c5c72669",
+        "worker.py": "632eb6fe0c33e0676a71fc1753411e0c6c2a3dc8589dabc14de389b458a9e2ec",
+        "workspace.py": "9124f31472c0ba13784da97f1d76e1df1e5f18e8b3a4f798f856f43e01571512"
+      },
+      "image_bytecode_cache_files": [],
+      "image_source_sha256": {
+        "__init__.py": "958a18fc03b9646e92634529963bc846bfb20c3ee204d89df828c4e51dc763fb",
+        "__main__.py": "935a1c1166b0c1ea35a82256345000bf2c73ded718d77773bc27a71ecce28f7d",
+        "budget.py": "520d59fb34dcd9a658286b34c047556ed1d5d6aeef57254d955432dbd178095f",
+        "cli.py": "538dc56f259dc211cf30035d2fe116081cdad19a646b09cd6a0313ac6e1ebd24",
+        "contracts.py": "7f36d7e44cc1fc060f3470ff3092b78496de35aa6b0371a67ab653f506d65b46",
+        "execution.py": "e77ace3438715bf9e0b178f2f1cc2fa0eec0ab9dee03f3525d853f011fcd2f35",
+        "model_client.py": "3c3242753ce2e62b51cd35f8baae3cebe76f667fe8a06f260f2573d721564627",
+        "prompts.py": "b285dc1ff81335e52c1a9c6d14ccce5d0eb7236cbaa6278a3be6d1635d3e5324",
+        "review.py": "f47294d01bddfabcfca9c38c285752258bddfc7634ab6af13cdc09a4763a07e1",
+        "semantic.py": "1201c46d994f0ff505e2a293d9d82b9e8d8fea220c1eef641ed529495ae29250",
+        "solver.py": "a2feff3431b1581a89ab48519fab30c71220337de6bf5715555e73fdcec87b08",
+        "task_reader.py": "920a67567f0e25a2d9886567ab16b58107325d38b8f197fca9400b87c5c72669",
+        "worker.py": "632eb6fe0c33e0676a71fc1753411e0c6c2a3dc8589dabc14de389b458a9e2ec",
+        "workspace.py": "9124f31472c0ba13784da97f1d76e1df1e5f18e8b3a4f798f856f43e01571512"
+      },
+      "module_origins": {
+        "agent": "/app/agent/__init__.py",
+        "agent.budget": "/app/agent/budget.py",
+        "agent.cli": "/app/agent/cli.py",
+        "agent.solver": "/app/agent/solver.py"
+      }
+    },
+    "pushed": false,
+    "platform_submitted": false
+  },
+  "validation_runs": [
+    {
+      "log": "before.log",
+      "result": "expected initial red: new budget module missing"
+    },
+    {
+      "log": "budget-host.log",
+      "result": "failed due Windows sandbox temporary-directory permissions"
+    },
+    {
+      "log": "budget-host-workspace-tmp.log",
+      "result": "failed due Windows sandbox path resolution permissions"
+    },
+    {
+      "log": "budget-host-unrestricted.log",
+      "tests": 6,
+      "passed": 6,
+      "result": "same core tests passed after approved escalation"
+    },
+    {
+      "log": "linux-suite.log",
+      "tests": 117,
+      "passed": 113,
+      "errors": 3,
+      "skipped": 1,
+      "seconds": 108.777,
+      "scope": "baseline image + read-only current source overlay; complete original suite plus initial budget tests",
+      "failure_reason": "qfbench2_common was absent from runtime image for submission tooling tests"
+    },
+    {
+      "log": "linux-budget-tools-with-toolkit.log",
+      "tests": 15,
+      "passed": 15,
+      "seconds": 8.934,
+      "scope": "8 budget methods including three real CLI long-card subcases; 7 tool tests; read-only official common toolkit supplied; resolves preceding errors/skip"
+    },
+    {
+      "log": "clock-reset-negative-control.log",
+      "result": "expected failure: isolated mutant resets child start and reaches ModelClient after budget expired; current source unchanged",
+      "detail": "Failure is mocked response serialization error after incorrectly reaching model, not a clean assertion failure"
+    },
+    {
+      "log": "image-representative-tests.log",
+      "tests": 8,
+      "passed": 7,
+      "failures": 1,
+      "scope": "initial image; combined same-process tests",
+      "failure_reason": "Earlier process-group watchdog test leaves an adopted zombie in unittest PID1; exclusive E1 subreaper correctly disables optional E1. Separately reproduced with /proc evidence; not attributed to bytecode."
+    },
+    {
+      "log": "image-e1-diagnostic.log",
+      "tests": 1,
+      "passed": 1,
+      "seconds": 7.241,
+      "scope": "isolated slow-House recovery on initial image"
+    },
+    {
+      "log": "combined-e1-test-isolation-diagnostic.log",
+      "tests": 1,
+      "passed": 1,
+      "scope": "final image diagnostic; /proc child state Z after predecessor; _subreaper refuses exclusive supervision as designed"
+    },
+    {
+      "log": "image-budget-watchdog.log",
+      "tests": 5,
+      "passed": 5,
+      "seconds": 7.144,
+      "scope": "final baked image; real CLI 600 cap with card600/1200/2400 subcases, parent clock, expired child, discovery watchdog and separate process-group cleanup"
+    },
+    {
+      "log": "image-e1-isolated.log",
+      "tests": 3,
+      "passed": 3,
+      "seconds": 7.38,
+      "scope": "final baked image; slow-House private-pipe recovery, forged marker refusal, terminal failed restoration"
+    },
+    {
+      "log": "image-fault-tests-quarter-second.log",
+      "tests": 2,
+      "passed": 2,
+      "scope": "preliminary 0.25s restoration-delay version"
+    },
+    {
+      "log": "image-fault-tests.log",
+      "tests": 2,
+      "passed": 2,
+      "seconds": 3.961,
+      "scope": "final baked image; tiny1e-9/0.001 cards exit nonzero before House; 1.25s parent restore delay exceeds gap; stopped/reaped supervised child and orphan before restore; SHA256 and644/755 permissions before success; failed delayed restoration returns7"
+    }
+  ],
+  "validation_protocol": {
+    "counts": "Per invocation, with overlap; never sum them as unique tests or claim one complete passing 117-test invocation",
+    "final_image_environment": "linux/amd64; network none; read-only; UID65534; cap-drop ALL; no-new-privileges; tmpfs /tmp noexec/nosuid/nodev64MiB; 2 CPUs/2GiB; pids256; nofile1024; nproc256",
+    "final_image_imports": "Only /tests was mounted; PYTHONPATH=/app:/tests, cwd=/app. /app/agent from image was not overlaid. Source binding separately verifies all module origins.",
+    "model": "Synthetic local mock HTTP only; no paid House or platform call",
+    "review_race_response": "solver.expire kills descendants when baseline is published, checkpoints and os._exit(124); it never restores. Parent first waits and stops adopted children, then restores, then main finally normalizes permissions. 1.25s injected restoration test verifies this order."
+  },
+  "build_failures": {
+    "logs": [
+      "image-build-denied-cache.log",
+      "image-build-denied-cache-retry.log"
+    ],
+    "cause": "Docker CLI Windows filesystem Access denied opening unrelated qfbench-agent/.pytest_cache during context traversal",
+    "automatic_approval_rejection": false,
+    "resolution": "Approved escalation executed each attempt; prepared explicit minimal source-only workspace context and built successfully. No permission changes or credential access."
+  },
+  "limitations": [
+    "Local reliability regression evidence only; current platform score and House solve-rate improvement remain unknown.",
+    "Default cap remains360 but work budget decreases345 to336 seconds; explicit600 is a candidate, not promoted as proven better.",
+    "Exit/publication reserves are best effort, not a hard guarantee against host scheduling or filesystem delays. A10s synthetic card reserves0.5s exit but existing cleanup waits may take2s.",
+    "Real CLI candidate cases use published600–2400 card range with fast synthetic solves, not full600-second timed exhaustion. Tiny-card fail-closed behavior was checked separately.",
+    "Container creation and image pulls occur before CLI origin and count against organizer limits; Final roster count and remaining stage time are unavailable.",
+    "Official checker mismatches remain upstream; no task-ID templates or hidden-answer assumptions were added."
+  ],
+  "changed_files_sha256": {
+    "qfbench-agent/.dockerignore": "d94399fa40f0893a71fe802e6a32743e03632e30a0f365b37eac4aa86550c27f",
+    "qfbench-agent/Dockerfile.budget": "81dc6a6cf71edb6e423b18c8492765cb0187f0eed458af1cd354c9dbbce0bf0e",
+    "qfbench-agent/README.md": "eb1b7d4b52debe4188c9dc91b50a3c087fa6e00843f89f19cbd8bb78dbae969e",
+    "qfbench-agent/agent/budget.py": "520d59fb34dcd9a658286b34c047556ed1d5d6aeef57254d955432dbd178095f",
+    "qfbench-agent/agent/cli.py": "538dc56f259dc211cf30035d2fe116081cdad19a646b09cd6a0313ac6e1ebd24",
+    "qfbench-agent/agent/solver.py": "a2feff3431b1581a89ab48519fab30c71220337de6bf5715555e73fdcec87b08",
+    "qfbench-agent/agent/task_reader.py": "920a67567f0e25a2d9886567ab16b58107325d38b8f197fca9400b87c5c72669",
+    "qfbench-agent/tools/evaluate.py": "aeee86a2bea3147d4eb6dec0ee6d85d454a0060d27f410f1a173ca94b26f70ab",
+    "qfbench-agent/tests/test_budget.py": "9c1f2f8718e5891b97e4c6054662bab36b8e202b9e90f1fdb46bc12050ac06af",
+    "qfbench-agent/tests/test_semantic.py": "7dde60cbae050f9dbbfe147c7fb49ba5f10b0abcf37f0fc7928618a59ab92ae3"
+  },
+  "evidence_file_sha256": {
+    "before.log": "17f09a7f5d662e7802302c0b3d665c4c6d9a57dda1ff64608266c500de91d730",
+    "budget-host-unrestricted.log": "73fe93301ff22644e8105cdd5f0c0153f5a0fdec9502881d3e17a27c81580d02",
+    "budget-host-workspace-tmp.log": "beb349534b6f536e5c55ed9de7f4b5516b582c05ef4cbb4091b603b43706b936",
+    "budget-host.log": "18eea232fcce7762c96bdeaddbd9e4776f358b7c54abbb33517965cffbfc6369",
+    "clock-reset-negative-control.json": "8c305b9b5f85c7af4e77355630ce99b3f5647f3365bcbc7303a105670a28fa67",
+    "clock-reset-negative-control.log": "354305716780a39f9a08725ad177ba26f0cacfb5863ab1d997043f3903c41cb0",
+    "combined-e1-test-isolation-diagnostic.log": "56e30ea83a807e396879ecd46990c038d7b7c1bee45551fb98a1e6e5e9a0eea4",
+    "final-test-commands.json": "fe61ef091b6cac37bdd0760ebc66c50597547f30d2508c552b12ac12e5883ede",
+    "image-budget-watchdog.log": "b1893220be921eb89842291d6a06d3da3a3568c0c55a8ed92737978fb54deca3",
+    "image-build-denied-cache-retry.log": "305ae941d3a1d4681259440ed280ea0c622470bf63a31c7c72f815c93ae29a07",
+    "image-build-denied-cache.log": "c88ce8bba3d32880cc824faaa12b09b6edb0c7139a06f9300a8b54ff5e272059",
+    "image-build-initial.log": "8707ba62cfa8a2939fccbc3089b994776d54d0f41d775ec2db70d51f4e0197b1",
+    "image-build.log": "96891ac66394713ff687471f7136ce968c87e68018bde1710178d0f3d44f156b",
+    "image-e1-diagnostic.log": "0d397d316e54dded4fa174cc0ef6bcc79a27187f6ab6d2ddf70ce3b5bdbdda4d",
+    "image-e1-isolated.log": "b6a8dc33d4998710762bf0fe7972270cac126bedf8a626d0661e5ec9ef661692",
+    "image-fault-tests-quarter-second.log": "218eb476ce68cd4bd8d0a35f1d68d6412c29f876d08975caca22fa1548c34601",
+    "image-fault-tests.log": "72d4714b4b849f33a2deb75ca6bace4e0e0e1c91c8733504db71f17d7f55c301",
+    "image-inspect-initial.json": "5adacb2fbe7d8a735c575e5c76a61996edb72f9de5b05dee6aaca58d592c00ef",
+    "image-inspect.json": "feabadc15c80d5849018f9d2b56c0361b4f3eb4b67bf78d75d152a61c059b97c",
+    "image-representative-tests.log": "36f563a849d6f3d9839b01e6216308539bbe4f08b8b422fef36d8c51a57bd189",
+    "image-source-binding-initial.json": "3a04c4c8a288d9b4523dfd3238a706ef0ab55d5948138cb3a8a6f20697536c1a",
+    "image-source-binding.json": "38cb584e323bf7a96e886bd65c49b5eb145d8fd9985c9247e00409670ce49d79",
+    "linux-budget-tools-with-toolkit.log": "6220665576a04ebace431a14b77d55964aa9312236dfb34c46d8c6fcbfc73272",
+    "linux-suite.log": "a263b8250830ed93e9b40df56f8db605d6d7de8b24db040b722dbd69bb47c6af"
+  }
+}

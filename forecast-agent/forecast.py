@@ -130,7 +130,7 @@ def main(argv=None):
     parser.add_argument('--asof', required=True)
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--seed', type=int, default=os.environ.get('QFBENCH_SEED', '0'))
-    parser.add_argument('--n-draws', type=int, default=500)
+    parser.add_argument('--n-draws', type=int)
     parser.add_argument('--method', choices=['contract-probe', 'gaussian', 'bootstrap',
                                              'reference-walk', 'online-ensemble',
                                              'm0-control'], default='gaussian')
@@ -143,6 +143,8 @@ def main(argv=None):
     card, grid, spec = load_contract(args.panels, args.asof)
     floor = max(200, int(card.get('scoring', {}).get('params', {}).get('n_draws_min', 0)),
                 int(spec.get('n_draws_min', 0)) if spec else 0)
+    if args.n_draws is None:
+        args.n_draws = max(500, floor)
     if not floor <= args.n_draws <= ParseLimits().max_draws:
         raise ValueError('Draw count outside declared limits')
     if not args.text.is_dir():

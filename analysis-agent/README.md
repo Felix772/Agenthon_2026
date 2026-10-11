@@ -20,12 +20,13 @@ the internal unit acknowledgement from already serialized JSON, verify corpus
 offsets or dates, or establish production faithfulness. Those belong to the
 assembly, retrieval and official judge stages respectively.
 
-The latest local validation uses Python 3.13, toolkit 2.6.0 and Track 4 scorer 5.2.2. Tests use synthetic
+The latest local validation uses Python 3.13, toolkit 2.6.0 and Track 4 scorer 5.3.0. Tests use synthetic
 predictions and an external pinned evaluator; set `QFBENCH_T4_SOURCE` to its source
 directory and, if stored separately, `QFBENCH_T4_UNITS` to its LF-preserving units.
 The old September 23 evaluator is not a substitute for the current contract.
 The current test default is the LF-preserving snapshot at
-`.validation/t4-e2-scorer-5.2.2-20261001` in the workspace root.
+`.validation/t4-scorer-5.3.0-20261011/track4-analysis-public-5d3b726a49b8ea218543e4d24319895874dcff6e`
+in the workspace root.
 `build_answer(..., submitted_reasons=...)` accepts the optional 1–3 reason block
 and validates it with the current official schema. Omitting it remains valid.
 
@@ -53,7 +54,7 @@ empty ownership lists grant no citation permission; document-body metadata does
 not override the manifest. Unfiltered `search` remains available for offline
 retrieval comparisons and is not used by the prediction pipeline.
 
-Scorer 5.2.2 applies false-claim penalties and an optional reasoning bonus. The
+Scorer 5.3.0 applies false-claim penalties and an optional reasoning bonus. The
 old 80% prediction-entailment admission rule is not the current scoring contract.
 Schema and manifest checks do not verify neural contradiction or reason quality.
 
@@ -159,6 +160,28 @@ between free-form prose and numeric predictions. Those quality properties remain
 subject to independent review and the official reasoning judge.
 
 ### Local candidate image
+
+The October 11 candidate uses `Dockerfile.revision`: the previously published
+runtime digest plus only the validated revision fallback source. It retains all
+20 base layers and adds one source layer, without reinstalling dependencies.
+The local tag is `agenthon-t4:revision-scorer530-20261011`; the candidate has not
+been published or submitted by this check. The build context contains only that
+Dockerfile and `fallback.py`, whose SHA-256 is
+`d9054b6ab666a016db6e59f931af262da16c6586e83492f212d59d64a893c477`.
+
+All 11 public units completed from this image without source overlays, with
+answers identical to the previously checked candidate. The scorer 5.3.0 smoke
+and deterministic claim checks accept all 11. The 78 claims are exact eligible
+quotes; both published judge-model tokenizers were run at recorded immutable
+revisions and measured at most 115 tokens. The organizer's deployed revisions
+are not public, so their equivalence remains unknown. No neural weights or NLI
+forward pass were used. Negative controls cover the first-20 cap, invalid
+citations after that cap, counted false claims, and claims over 400 tokens.
+Related container regression tests pass 160/160. This is compatibility evidence,
+not an official prediction score. See `verification/t4-scorer530-20261011.json`
+at the workspace root for the image and evidence hashes.
+
+The original image build recipe and its September evidence follow.
 
 `Dockerfile` expects a dedicated build context with `analysis_agent/*.py` and the
 shared transport copied as `model_client.py`. Do not use the entire workspace

@@ -1,6 +1,26 @@
 # Track 3 simulation image
 
-The current submitted Development image is the four-worker batch version used
+## Current status — 2026-10-11
+
+The current submitted image is the scalar implementation with license notices,
+`docker.io/felix772/agenthon-2026-t3@sha256:2c88bb849a19a485a4964fa343ef9a18fd144ce77e76f69394315e2691649ec1`,
+Development submission **972772**. Its current official status and score have
+not been retrieved. The earlier results below are historical evidence.
+
+The [October 10 Final limits](https://github.com/Agenthon-2026/Agenthon2026-public/issues/2#issuecomment-6099955125)
+specify 300 seconds per invocation, 4 CPUs, 16 GiB, one warm-up and four counted
+invocations, within a 24-hour complete run. All invocations must succeed with
+stable outputs. Images must stay anonymously pullable through results publication.
+
+Two fresh restricted container checks on October 11 passed the current public
+g0–g3 developer verifier. The single-market and four-market batch outputs retain
+all ten previous Parquet hashes, including every required message ledger. These
+two runs are local compatibility evidence, not the official five-run protocol
+or a new speed comparison. See `../verification/t3-resources-20261011.json`.
+
+## Historical Development results
+
+The earlier Development image was the four-worker batch version used
 in CodaBench submission **950514**. It scored **29,447.2373 events/s** over
 all 71 scored units, versus **26,124.5133 events/s** for submission 948335.
 All six batch units improved substantially. The `simulate` single-market path

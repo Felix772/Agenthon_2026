@@ -1,0 +1,118 @@
+{
+  "date": "2026-10-11",
+  "upstream_head": "1d7e994761f2e9256dd0c572c3592422c8fd0914",
+  "image": "sha256:2c88bb849a19a485a4964fa343ef9a18fd144ce77e76f69394315e2691649ec1",
+  "code_changed": false,
+  "resource_policy": {
+    "invocation_limit_sec": 300,
+    "cpus": 4,
+    "memory_gib": 16,
+    "tmp_mib": 64,
+    "output_mib": 256,
+    "official_warmup": 1,
+    "official_counted_runs": 4,
+    "total_run_limit_sec": 86400
+  },
+  "validation": {
+    "passed": true,
+    "rows": [
+      {
+        "unit": "t3-as01-base-mix",
+        "exit_code": 0,
+        "oom_killed": false,
+        "host_config": {
+          "NanoCpus": 4000000000,
+          "Memory": 17179869184,
+          "MemorySwap": 17179869184,
+          "PidsLimit": 256,
+          "NetworkMode": "none",
+          "ReadonlyRootfs": true
+        },
+        "local_wall_sec": 7.312763599911705,
+        "host_events": 24695,
+        "gate_results": {
+          "g0_integrity": {
+            "passed": true,
+            "label": null,
+            "detail": {}
+          },
+          "g1_schema": {
+            "passed": true,
+            "label": null,
+            "detail": {}
+          },
+          "g2_cutoff_resource": {
+            "passed": true,
+            "label": null,
+            "detail": {}
+          },
+          "g3_domain_semantics": {
+            "passed": true,
+            "label": null,
+            "detail": {}
+          }
+        },
+        "stable_parquet": 2,
+        "all_stable_bytes_match_oct9": true
+      },
+      {
+        "unit": "t3-gbatch-homog-4",
+        "exit_code": 0,
+        "oom_killed": false,
+        "host_config": {
+          "NanoCpus": 4000000000,
+          "Memory": 17179869184,
+          "MemorySwap": 17179869184,
+          "PidsLimit": 256,
+          "NetworkMode": "none",
+          "ReadonlyRootfs": true
+        },
+        "local_wall_sec": 3.610972600057721,
+        "host_events": 32580,
+        "gate_results": {
+          "g0_integrity": {
+            "passed": true,
+            "label": null,
+            "detail": {}
+          },
+          "g1_schema": {
+            "passed": true,
+            "label": null,
+            "detail": {}
+          },
+          "g2_cutoff_resource": {
+            "passed": true,
+            "label": null,
+            "detail": {}
+          },
+          "g3_domain_semantics": {
+            "passed": true,
+            "label": null,
+            "detail": {}
+          }
+        },
+        "stable_parquet": 8,
+        "all_stable_bytes_match_oct9": true
+      }
+    ],
+    "runtime_invocations": 2,
+    "stable_parquet_matches": 10,
+    "new_full_timing_experiment": false,
+    "official_rank_claim": null,
+    "gpu_exercised": false,
+    "peak_memory_measured": false
+  },
+  "evidence_dir": "project-evidence/t3-resources-20261011",
+  "verifier_source_sha256": "9329fdad2c49f19e3fed4c5ee0ae10cb1b7a1e6032fc99f2dd8084a7a60cae05",
+  "initial_verifier_failure": {
+    "cause": "Official GitHub archive contains Git LFS reference pointers, not parquet bytes.",
+    "preserved": "project-evidence/t3-resources-20261011/verdicts-before-lfs.json",
+    "correction": "Hydrated ten exact public reference LFS objects from existing cache only after current pointer OID and size matched. No simulator rerun.",
+    "record": "project-evidence/t3-resources-20261011/lfs-hydration.json"
+  },
+  "limitations": [
+    "Two representative units only; not a full roster or five-invocation official timing run.",
+    "Concurrent local work; no comparative speed or rank claim.",
+    "Historical 426-run evidence retained without repetition."
+  ]
+}

@@ -6,6 +6,7 @@ import shutil
 import threading
 import time
 from pathlib import Path
+from .budget import budget_for, configured_cap
 from .execution import execute
 from .contracts import instruction_contract
 from .model_client import ModelClient, ModelError
@@ -38,8 +39,11 @@ def parse_solution(text, *, check_compile=True):
     return result
 
 
-def solve(task_dir: Path, out: Path):
-    started = time.monotonic()
+def solve(task_dir: Path, out: Path, *, started=None):
+    now = time.monotonic()
+    started = now if started is None else started
+    if type(started) not in (int, float) or not math.isfinite(started) or started > now:
+        raise ValueError("Invalid local CLI start time")
     # Persist before task parsing/client setup, so those failures have evidence.
     # The CLI also emits a safe startup event if output setup itself fails.
     out = prepare_output(task_dir.resolve(), out)
@@ -89,27 +93,33 @@ def solve(task_dir: Path, out: Path):
 
     checkpoint("startup")
     try:
-        soft_timeout = float(os.environ.get("AGENT_SOFT_TIMEOUT_SEC", "360"))
-        if not math.isfinite(soft_timeout) or soft_timeout <= 0:
-            raise ValueError("AGENT_SOFT_TIMEOUT_SEC must be positive and finite")
+        soft_timeout = configured_cap()
         # Bound discovery/inspection as well as model calls and execution.
-        watchdog = threading.Timer(max(0.01, started + soft_timeout - time.monotonic()), expire)
+        initial_deadline = budget_for(soft_timeout, soft_timeout).child_deadline(started)
+        if initial_deadline <= time.monotonic():
+            raise TimeoutError("CLI budget expired before task discovery")
+        watchdog = threading.Timer(max(0.01, initial_deadline - time.monotonic()), expire)
         watchdog.daemon = True
         watchdog.start()
         task = read_task(task_dir)
-        effective_timeout = min(task.timeout, soft_timeout)
-        deadline = started + effective_timeout
+        budget = budget_for(task.timeout, soft_timeout)
+        effective_timeout = budget.ceiling
+        deadline = budget.child_deadline(started)
         watchdog.cancel()
+        if deadline <= time.monotonic():
+            raise TimeoutError("CLI budget expired during startup or task discovery")
         watchdog = threading.Timer(max(0.01, deadline - time.monotonic()), expire)
         watchdog.daemon = True
         watchdog.start()
         checkpoint("client", timeout_sec=task.timeout, soft_timeout_sec=soft_timeout,
-                   effective_timeout_sec=effective_timeout, publication_reserve_sec=min(15, effective_timeout * .05))
+                   effective_timeout_sec=effective_timeout, publication_reserve_sec=budget.publication_reserve,
+                   exit_reserve_sec=budget.exit_reserve, watchdog_gap_sec=budget.watchdog_gap,
+                   work_budget_sec=budget.work_deadline(0), budget_clock="shared local CLI monotonic start")
         client = ModelClient()
         attempts = int(os.environ.get("AGENT_MAX_ATTEMPTS", "3"))
         if not 1 <= attempts <= 5:
             raise ValueError("AGENT_MAX_ATTEMPTS must be between 1 and 5")
-        work_deadline = deadline - min(15, effective_timeout * .05)
+        work_deadline = budget.work_deadline(started)
         review_enabled = os.environ.get("AGENT_C3_REVIEW", "0") == "1"
         semantic_enabled = os.environ.get("AGENT_E1_SEMANTIC", "0") == "1"
         review_used = False

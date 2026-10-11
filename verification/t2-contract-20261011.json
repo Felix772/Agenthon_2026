@@ -1,0 +1,378 @@
+{
+  "created_at_utc": "2026-10-11T19:43:56.643635+00:00",
+  "scope": "Track 2 preventive draw-floor contract fix; synthetic and local container validation only.",
+  "upstream_live_heads": {
+    "track2-forecasting-public": "a2c93e7b66b8c6a6c429fda81d6bc7873b7c5dec",
+    "track3-simulation-public": "1d7e994761f2e9256dd0c572c3592422c8fd0914",
+    "Agenthon2026-public": "c817c36780aba74e9caeb8d86167103b66b779f1"
+  },
+  "local_validation_checkout_heads": {
+    "Agenthon2026-public": "6fe0fe79f638759891fc0a097d0a57eaff9fe772",
+    "track2-forecasting-public": "30c8019d997f930eab9ba569d089d12298d86d8c"
+  },
+  "source_hashes": {
+    "forecast-agent/forecast.py": "a1198b8e0c9a86df24aac5913e52f506d864577ee56a361df1c7ea1bab8cea0e",
+    "forecast-agent/test_draw_floor.py": "5d424c3bc071baaf64f36bd57c3bbadd0d9e9d66cfe1bbef9385000b7ef8a178",
+    "forecast-agent/Dockerfile.draw-floor": "886373768574de24c68a26a3b69c8403541c2c12a6a332b476dbe6b73bde384d",
+    "forecast-agent/README.md": "ef45896a7652074216b6c30e4f25f3c922196a35b746d3b58c100027e19b3ab9",
+    "track2-forecasting-public/qfbench2_track_forecasting/scoring.py": "6ce2dd8abd06d289a6acbd03328018dad36e91d92c0271b61acd9cd8664b9de5",
+    "Agenthon2026-public/common/qfbench2_common/schemas/forecast.schema.json": "b6038a70f2b6369fce28ae50bb09e5a7f1f127e57c4e26aaa9b66ecce425e023"
+  },
+  "behavior": {
+    "implicit_draws": "max(500, 200, card n_draws_min, optional forecast_spec n_draws_min)",
+    "explicit_draws": "strict declared floors and 20000 maximum",
+    "experimental_500_only_profiles": "remain strict in local source; not present in the production-derived image",
+    "statistical_algorithm_changed": false
+  },
+  "pre_fix_regression": {
+    "test_methods": 6,
+    "error_subtests": 7,
+    "failure_subtests": 3,
+    "causal_errors": "Five legal card/spec floors and both synthetic F4 UST/G10 cards rejected by the implicit 500 draw count.",
+    "other_failures": "Three 500-only-profile refusal messages differed; the profiles already refused higher floors."
+  },
+  "host_validation": {
+    "total_test_methods_passed": 40,
+    "new_test_methods_included_in_total": 6,
+    "new_tests_rerun_after_corpus_fixture_correction": 6,
+    "all_successful": true,
+    "original_500_cases_byte_identical": 3,
+    "deliverable_files_byte_identical": 9
+  },
+  "image": {
+    "parent": "sha256:461ad3fb69becc4084744879ba8f9bf53ae7e4de64f49785f14fae3a217aa8a3",
+    "candidate": "sha256:655724ba6e6dc030e28772420ebee3d522e1f1c0893d797ba88b9bd22185bf21",
+    "changed_app_files": [
+      "forecast.py"
+    ],
+    "app_file_count": 16,
+    "packages_identical": true,
+    "package_count": 15,
+    "config_identical": true,
+    "parent_forecast_sha256": "89e5f36b736c8df73a8190af9922eb9fb29569354bbe1ec84b74a34e907c56e5",
+    "candidate_forecast_sha256": "e77f240670ed2b617709cf1757b5c859dfe9826599e8b68d8a8377bfeb126285",
+    "exact_approved_source_diff": true
+  },
+  "container_validation": {
+    "total_forecast_invocations_final_suite": 15,
+    "expected_old_image_failures": 1,
+    "successful_invocations": 14,
+    "successful_new_image_invocations": 11,
+    "future_synthetic_cases": 8,
+    "families": [
+      "T2-F1",
+      "T2-F2",
+      "T2-F3",
+      "T2-F4"
+    ],
+    "universes": [
+      "UST levels",
+      "G10 simple-return histories to cumulative log_return forecasts"
+    ],
+    "asof": "2026-10-23",
+    "horizon_keys": [
+      2,
+      7,
+      12
+    ],
+    "f4_draw_floor": 1000,
+    "official_gates": "g0_integrity through g3_domain_semantics pass on all 14 successful invocations",
+    "future_card_schema_and_staging_cutoffs": "8/8 pass; all panel dates at or before asof, one explicitly synthetic dated corpus note per card",
+    "old_500_parity": [
+      {
+        "case": "daily-level",
+        "identical_deliverables": [
+          "forecast.parquet",
+          "forecast_meta.json",
+          "forecast_rationale.md"
+        ]
+      },
+      {
+        "case": "daily-log-return",
+        "identical_deliverables": [
+          "forecast.parquet",
+          "forecast_meta.json",
+          "forecast_rationale.md"
+        ]
+      },
+      {
+        "case": "monthly-level",
+        "identical_deliverables": [
+          "forecast.parquet",
+          "forecast_meta.json",
+          "forecast_rationale.md"
+        ]
+      }
+    ],
+    "max_successful_output_bytes": 71427,
+    "max_successful_elapsed_seconds": 3.205074799945578,
+    "resource_profile": {
+      "cpu_limit": 4,
+      "memory": "16GiB",
+      "tmpfs": "64MiB",
+      "read_only_root": true,
+      "non_root": "65534:65534",
+      "network": "none",
+      "pids_limit": 128,
+      "capabilities": "none",
+      "runtime": "runc",
+      "fsize_limit": "64MiB",
+      "no_new_privileges": true
+    },
+    "resource_note": "Bounded local regression, using less CPU/memory than the published T2 Final 16 CPU / 128 GiB allowance; not an official platform timing."
+  },
+  "preserved_failed_attempts": [
+    {
+      "log": "project-evidence/t2-contract-20261011/docker-initial-import-failure.log",
+      "image": "sha256:f5c7359eb3c77df1252e6bb5ed33048a25b8fdb8c4e8eda3fd7c6b5076130aab",
+      "cause": "Copying the later local experimental entrypoint into the earlier production image imports an absent reference_model. Rejected; never submitted."
+    },
+    {
+      "log": "project-evidence/t2-contract-20261011/docker-suite.log",
+      "cause": "New staging check correctly rejected an empty synthetic corpus before candidate forecasts. Fixed test fixtures by adding one explicitly synthetic, dated, non-predictive note."
+    }
+  ],
+  "evidence_root": "project-evidence/t2-contract-20261011/",
+  "primary_logs": [
+    "regression-before.log",
+    "regression-after.log",
+    "suite-after.log",
+    "regression-after-corpus-fixture.log",
+    "docker-build.log",
+    "docker-initial-import-failure.log",
+    "docker-build-v2.log",
+    "docker-suite.log",
+    "docker-suite-v2.log",
+    "docker-v2-T2-F4-UST-old-failure.stderr.log",
+    "docker-boundary-suite.log",
+    "docker-boundary-parse-limits.stdout.log",
+    "docker-boundary-default-2000.stdout.log",
+    "docker-boundary-default-2000.gates.json",
+    "docker-boundary-explicit-500-below-floor-1000.stderr.log",
+    "docker-boundary-explicit-20001-above-maximum.stderr.log"
+  ],
+  "limitations": [
+    "No realized outcomes, official quality score, rank, or new submission was used or produced.",
+    "Future fixtures test interface compatibility, not text reasoning or prediction quality.",
+    "No evidence that actual Final cards will declare n_draws_min above 500.",
+    "The image entrypoint differs from the complete local experimental entrypoint; its exact approved patch is recorded in image-source.diff.",
+    "D1 candidate family remains stopped; production statistical method retained."
+  ],
+  "publication": {
+    "scope": "State when this validation was recorded; later source commits do not change the recorded image or platform status.",
+    "candidate_image_published": false,
+    "new_platform_submission": false,
+    "source_committed_at_validation": false
+  },
+  "rule_sources": [
+    "https://github.com/Agenthon-2026/track2-forecasting-public/issues/4",
+    "https://github.com/Agenthon-2026/track2-forecasting-public/issues/26",
+    "https://github.com/Agenthon-2026/track2-forecasting-public/issues/28",
+    "https://github.com/Agenthon-2026/Agenthon2026-public/issues/2"
+  ],
+  "current_scorer_source_binding": {
+    "evidence": "project-evidence/t2-contract-20261011/upstream-source-binding.json",
+    "evidence_sha256": "7093acde6e4c64d9abeb0b178bcbe6a67109714a9e7eda3d8abca4b1272f9bd7",
+    "method": "GitHub fixed-SHA compare proves no runtime path changes; every local Python/JSON source is bound to the validation commit via git show, allowing CRLF-only checkout differences.",
+    "repositories": [
+      {
+        "repository": "Agenthon2026-public",
+        "validation_checkout_head": "6fe0fe79f638759891fc0a097d0a57eaff9fe772",
+        "live_head": "c817c36780aba74e9caeb8d86167103b66b779f1",
+        "api_compare_url": "https://api.github.com/repos/Agenthon-2026/Agenthon2026-public/compare/6fe0fe79f638759891fc0a097d0a57eaff9fe772...c817c36780aba74e9caeb8d86167103b66b779f1",
+        "html_compare_url": "https://github.com/Agenthon-2026/Agenthon2026-public/compare/6fe0fe79f638759891fc0a097d0a57eaff9fe772...c817c36780aba74e9caeb8d86167103b66b779f1",
+        "status": "ahead",
+        "ahead_by": 3,
+        "changed_files": [
+          {
+            "path": "README.md",
+            "status": "modified",
+            "previous_filename": null
+          },
+          {
+            "path": "docs/DEVELOPMENT-RUNTIME.md",
+            "status": "modified",
+            "previous_filename": null
+          },
+          {
+            "path": "docs/GLOSSARY.md",
+            "status": "modified",
+            "previous_filename": null
+          },
+          {
+            "path": "docs/IMAGE-SUBMISSIONS.md",
+            "status": "modified",
+            "previous_filename": null
+          },
+          {
+            "path": "starter-packs/CHANGELOG.md",
+            "status": "modified",
+            "previous_filename": null
+          },
+          {
+            "path": "starter-packs/track1/AGENTS.md",
+            "status": "modified",
+            "previous_filename": null
+          },
+          {
+            "path": "starter-packs/track1/RUNTIME-ENVIRONMENT.md",
+            "status": "modified",
+            "previous_filename": null
+          },
+          {
+            "path": "starter-packs/track1/SUBMISSION-DESCRIPTOR.md",
+            "status": "modified",
+            "previous_filename": null
+          },
+          {
+            "path": "starter-packs/track1/TEAM-CLAIM.md",
+            "status": "modified",
+            "previous_filename": null
+          },
+          {
+            "path": "starter-packs/track2/AGENTS.md",
+            "status": "modified",
+            "previous_filename": null
+          },
+          {
+            "path": "starter-packs/track2/RUNTIME-ENVIRONMENT.md",
+            "status": "modified",
+            "previous_filename": null
+          },
+          {
+            "path": "starter-packs/track2/SUBMISSION-DESCRIPTOR.md",
+            "status": "modified",
+            "previous_filename": null
+          },
+          {
+            "path": "starter-packs/track2/TEAM-CLAIM.md",
+            "status": "modified",
+            "previous_filename": null
+          },
+          {
+            "path": "starter-packs/track3/AGENTS.md",
+            "status": "modified",
+            "previous_filename": null
+          },
+          {
+            "path": "starter-packs/track3/RUNTIME-ENVIRONMENT.md",
+            "status": "modified",
+            "previous_filename": null
+          },
+          {
+            "path": "starter-packs/track3/SUBMISSION-DESCRIPTOR.md",
+            "status": "modified",
+            "previous_filename": null
+          },
+          {
+            "path": "starter-packs/track3/TEAM-CLAIM.md",
+            "status": "modified",
+            "previous_filename": null
+          },
+          {
+            "path": "starter-packs/track4/AGENTS.md",
+            "status": "modified",
+            "previous_filename": null
+          },
+          {
+            "path": "starter-packs/track4/RUNTIME-ENVIRONMENT.md",
+            "status": "modified",
+            "previous_filename": null
+          },
+          {
+            "path": "starter-packs/track4/SUBMISSION-DESCRIPTOR.md",
+            "status": "modified",
+            "previous_filename": null
+          },
+          {
+            "path": "starter-packs/track4/TEAM-CLAIM.md",
+            "status": "modified",
+            "previous_filename": null
+          }
+        ],
+        "runtime_path": "common/",
+        "runtime_changes": [],
+        "local_runtime_git_status_clean": true,
+        "validated_python_and_schema_files": 130,
+        "newline_only_checkout_differences": 130
+      },
+      {
+        "repository": "track2-forecasting-public",
+        "validation_checkout_head": "30c8019d997f930eab9ba569d089d12298d86d8c",
+        "live_head": "a2c93e7b66b8c6a6c429fda81d6bc7873b7c5dec",
+        "api_compare_url": "https://api.github.com/repos/Agenthon-2026/track2-forecasting-public/compare/30c8019d997f930eab9ba569d089d12298d86d8c...a2c93e7b66b8c6a6c429fda81d6bc7873b7c5dec",
+        "html_compare_url": "https://github.com/Agenthon-2026/track2-forecasting-public/compare/30c8019d997f930eab9ba569d089d12298d86d8c...a2c93e7b66b8c6a6c429fda81d6bc7873b7c5dec",
+        "status": "ahead",
+        "ahead_by": 1,
+        "changed_files": [
+          {
+            "path": "README.md",
+            "status": "modified",
+            "previous_filename": null
+          },
+          {
+            "path": "SUBMISSION_CLI.md",
+            "status": "modified",
+            "previous_filename": null
+          }
+        ],
+        "runtime_path": "qfbench2_track_forecasting/",
+        "runtime_changes": [],
+        "local_runtime_git_status_clean": true,
+        "validated_python_and_schema_files": 14,
+        "newline_only_checkout_differences": 14
+      }
+    ],
+    "conclusion": "Current fixed-HEAD T2 scorer/helpers and shared common sources equal the validation checkout sources after CRLF normalization. Both upstream deltas only change Markdown documentation. Existing tests were not repeated because the runtime sources are unchanged."
+  },
+  "additional_final_image_draw_boundaries": {
+    "reason": "Review found these final-image boundaries were only covered on the host in the initial report. These are three new CLI cases, separate from the original 15-run suite.",
+    "image": "sha256:655724ba6e6dc030e28772420ebee3d522e1f1c0893d797ba88b9bd22185bf21",
+    "limits_observed_inside_image": {
+      "min_draws": 200,
+      "max_draws": 20000
+    },
+    "new_forecast_invocations": 3,
+    "success_expected_and_observed": 1,
+    "rejections_expected_and_observed": 2,
+    "default_2000_output_official_gates": "all g0-g3 pass",
+    "cases": [
+      {
+        "case": "default-2000",
+        "expected_exit": 0,
+        "actual_exit": 0,
+        "output_files": [
+          "forecast.parquet",
+          "forecast_meta.json",
+          "forecast_rationale.md"
+        ],
+        "n_draws": 2000,
+        "official_gates": {
+          "card_id": "t2-synthetic-T2-F4-UST",
+          "admissible": true,
+          "gates": {
+            "g0_integrity": "pass",
+            "g1_schema": "pass",
+            "g2_cutoff_resource": "pass",
+            "g3_domain_semantics": "pass"
+          },
+          "scored": false,
+          "note": "no --realized supplied: gates only, no score"
+        }
+      },
+      {
+        "case": "explicit-500-below-floor-1000",
+        "expected_exit": 1,
+        "actual_exit": 1,
+        "output_files": []
+      },
+      {
+        "case": "explicit-20001-above-maximum",
+        "expected_exit": 1,
+        "actual_exit": 1,
+        "output_files": []
+      }
+    ],
+    "evidence": "project-evidence/t2-contract-20261011/docker-boundary-results.json"
+  }
+}

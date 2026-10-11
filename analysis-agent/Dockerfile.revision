@@ -1,0 +1,4 @@
+# Preserve the already published runtime and replace only the validated fallback.
+# Build context: fallback.py from d7d0f19823cf9c7414b8c6102f6b8edbe2931eab.
+FROM docker.io/felix772/agenthon-2026-t4@sha256:c1fef9efaac99c1585f076397097bacd9acbd507ee773097ac3f2f4b5ef7de76
+COPY --chown=65534:65534 fallback.py /app/analysis-agent/analysis_agent/fallback.py
