@@ -1,0 +1,76 @@
+{
+  "checked_at_utc": "2026-10-11T21:12:37.376989+00:00",
+  "status": "FOUR_SIGNED_PACKAGES_VERIFIED_UPLOAD_BLOCKED",
+  "archives": [
+    {
+      "track": "t1",
+      "archive": "releases/development-20261011/t1/submission.zip",
+      "bytes": 1210,
+      "sha256": "aa42c6f809b42e934139ce46856aca3fe8dccdccf41b24e0ad81f56943f01fb4",
+      "descriptor_sha256": "7e39745eef6dc311c66abe0bbacd50cbed48244951e155907a45974f0716ef5f",
+      "image": {
+        "digest": "sha256:687a7c546639a46906615ae8377388daca49ede19d048f49764b0ed9569fe043",
+        "registry": "docker.io",
+        "repository": "felix772/agenthon-2026-t1"
+      },
+      "matches_reviewed_descriptor": true,
+      "phase": "dev",
+      "site_team_id": 321,
+      "structure_and_claim_binding_valid": true
+    },
+    {
+      "track": "t2",
+      "archive": "releases/development-20261011/t2/submission.zip",
+      "bytes": 1016,
+      "sha256": "3e7e1942b1bce272e0645a58b41fe416bf494c77dce9b08223d67c7bf462c434",
+      "descriptor_sha256": "4f9d0fd971cebf468b38594bcfb9f851c53ce46bf73332c02afd53938e7fa8f3",
+      "image": {
+        "digest": "sha256:655724ba6e6dc030e28772420ebee3d522e1f1c0893d797ba88b9bd22185bf21",
+        "registry": "docker.io",
+        "repository": "felix772/agenthon-2026-t2"
+      },
+      "matches_reviewed_descriptor": true,
+      "phase": "dev",
+      "site_team_id": 321,
+      "structure_and_claim_binding_valid": true
+    },
+    {
+      "track": "t3",
+      "archive": "releases/development-20261011/t3/submission.zip",
+      "bytes": 1027,
+      "sha256": "7a80fdec27aac9e1bd09c2555deeaffd8edd494dc2042632f98f62af91da5d28",
+      "descriptor_sha256": "716ab6cf078dd3dd3890086b8ecd367eda4e573eea16dbc0b0f47ebe7ce3b9a3",
+      "image": {
+        "digest": "sha256:2c88bb849a19a485a4964fa343ef9a18fd144ce77e76f69394315e2691649ec1",
+        "registry": "docker.io",
+        "repository": "felix772/agenthon-2026-t3"
+      },
+      "matches_reviewed_descriptor": true,
+      "phase": "dev",
+      "site_team_id": 321,
+      "structure_and_claim_binding_valid": true
+    },
+    {
+      "track": "t4",
+      "archive": "releases/development-20261011/t4/submission.zip",
+      "bytes": 1214,
+      "sha256": "6a51bc78eb240255a56ad782a222df643a7585361ab2909a8b5a642002904a32",
+      "descriptor_sha256": "c1c923091947124c94df6f9ca517d2a3abab107a03f4069cc2be38ecdcc3141e",
+      "image": {
+        "digest": "sha256:da6cfced0fb7b16d2cb5f9b3dbde63ba8387c63b7d2f9711b84d2475f68deb82",
+        "registry": "docker.io",
+        "repository": "felix772/agenthon-2026-t4"
+      },
+      "matches_reviewed_descriptor": true,
+      "phase": "dev",
+      "site_team_id": 321,
+      "structure_and_claim_binding_valid": true
+    }
+  ],
+  "team_key_read": false,
+  "hmac_independently_verified": false,
+  "validation_scope": "ZIP integrity, official descriptor schema, exact match to reviewed descriptor, claim structure and exact descriptor-byte binding; user signed through official hidden prompt.",
+  "platform_upload_attempted": false,
+  "new_submission_ids": {},
+  "browser_block": "Fresh normal browser access rejected because a saved site permission still blocks CodaBench. No alternate surface or API used."
+}

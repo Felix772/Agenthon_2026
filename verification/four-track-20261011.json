@@ -182,6 +182,15 @@
     "official_hidden_prompt_script": "releases/development-20261011/pack-hidden.ps1",
     "script_executed": false,
     "team_key_read": false,
-    "platform_upload": "Not attempted because saved CodaBench access denial remains in force."
+    "platform_upload": "Not attempted because saved CodaBench access denial remains in force.",
+    "snapshot_before_user_signing": true
+  },
+  "signed_packages_verification": {
+    "report": "verification/test-submission-20261011.json",
+    "all_four_archives_ready": true,
+    "official_hidden_prompt_completed_by_user": true,
+    "team_key_read": false,
+    "new_platform_submissions": false,
+    "blocker": "Saved CodaBench browser permission denial persists after the user reported it removed. No alternate surface or API used."
   }
 }
