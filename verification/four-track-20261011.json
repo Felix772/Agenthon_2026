@@ -106,8 +106,82 @@
     "scope": "Bounded local implementation and validation; no score guarantee.",
     "permission_configuration": "Automatic review rejected persistent Codex permission changes. No retry or indirect configuration modification. Existing authorized conversation messaging and individually approved local record writes used."
   },
-  "new_images_published": false,
+  "new_images_published": true,
+  "publication": {
+    "source_commit": "19c5923d4f06fd5040a4b01cf3f5d6d990baf63f",
+    "branch": "codex/t1-t4-optimization-20260929",
+    "github_remote_verified": true,
+    "new_image_tracks": [
+      "t1",
+      "t2",
+      "t4"
+    ],
+    "t3": "Existing published image retained",
+    "registry_digests": {
+      "t1": "docker.io/felix772/agenthon-2026-t1@sha256:687a7c546639a46906615ae8377388daca49ede19d048f49764b0ed9569fe043",
+      "t2": "docker.io/felix772/agenthon-2026-t2@sha256:655724ba6e6dc030e28772420ebee3d522e1f1c0893d797ba88b9bd22185bf21",
+      "t3": "docker.io/felix772/agenthon-2026-t3@sha256:2c88bb849a19a485a4964fa343ef9a18fd144ce77e76f69394315e2691649ec1",
+      "t4": "docker.io/felix772/agenthon-2026-t4@sha256:da6cfced0fb7b16d2cb5f9b3dbde63ba8387c63b7d2f9711b84d2475f68deb82"
+    },
+    "anonymous_pull_passed": [
+      "t1",
+      "t2",
+      "t3",
+      "t4"
+    ],
+    "anonymous_pull_method": "Fresh empty Docker client configuration, explicit linux/amd64 pull of each registry digest; existing local layers cached, not a cold-start timing test.",
+    "logs": "releases/development-20261011/*-push.log and *-anonymous-pull.log",
+    "validation_report_state": "Per-track reports describe their earlier validation checkpoint, before publication. This later publication record supersedes their image-not-published state.",
+    "log_sha256": {
+      "releases/development-20261011/t1-anonymous-pull.log": "b1c38a6e0c1648812f3ac36f634cce671ca6338f69fb7e5b156ffa0a830d2f20",
+      "releases/development-20261011/t1-push.log": "0e06a66874a2dace917412d6099a595ed186ff616ffce1500633334b0ea47f06",
+      "releases/development-20261011/t2-anonymous-pull.log": "4871c07755345ec013539727531cf4da64efc907301069063e68a57e74e4686c",
+      "releases/development-20261011/t2-push.log": "acfeac8cdc2619ec8e49b06f22dbd44d814c4b27cb395c71de04596d446252f2",
+      "releases/development-20261011/t3-anonymous-pull.log": "a00807cbe4c55791cf0eace292d4dc899836ed4668b6b9bd26edfe1b58153c57",
+      "releases/development-20261011/t4-anonymous-pull.log": "18414e44cedb8f918b75c4ab20d559112e04da136f7b7963d3f9a279b801c2a2",
+      "releases/development-20261011/t4-push.log": "13213c3d5f809da3bb44bddd02a9776f0999519095f00ef11c7310aa3d86bce0"
+    }
+  },
   "new_platform_submissions": false,
   "rank_claim": null,
-  "quality_gain_claim": null
+  "quality_gain_claim": null,
+  "offline_submission_preparation": {
+    "phase": "Development only",
+    "report": "releases/development-20261011/prepared-report.json",
+    "report_sha256": "bc6ed5e4ed0499619e4b296e3042550e7dfa0ceb7b7dfa8eb311b162056c9596",
+    "validated_descriptors": {
+      "t1": {
+        "path": "releases/development-20261011/t1/submission.json",
+        "sha256": "e589f4edeee798e61fd3d268a1c67aae7ac551fc6a653609adc9b4c1c9ed2245"
+      },
+      "t2": {
+        "path": "releases/development-20261011/t2/submission.json",
+        "sha256": "61a2ec91af7c17fe83ebe7be0bf11b7a806615650c7b62bb6b555d5a8d336d8e"
+      },
+      "t3": {
+        "path": "releases/development-20261011/t3/submission.json",
+        "sha256": "716ab6cf078dd3dd3890086b8ecd367eda4e573eea16dbc0b0f47ebe7ce3b9a3"
+      },
+      "t4": {
+        "path": "releases/development-20261011/t4/submission.json",
+        "sha256": "3fe232fc71061efa9b0ed8fdd557d219568bff43c1fd2fb228d57316deacca85"
+      }
+    },
+    "signed_archive_ready": {
+      "path": "releases/development-20261011/t3/submission.zip",
+      "sha256": "7a80fdec27aac9e1bd09c2555deeaffd8edd494dc2042632f98f62af91da5d28",
+      "bytes": 1027,
+      "copied_byte_for_byte": true
+    },
+    "tracks_requiring_fresh_signature": [
+      "t1",
+      "t2",
+      "t4"
+    ],
+    "reason": "Image digest changes alter descriptor bytes; the previous claim signature cannot be reused.",
+    "official_hidden_prompt_script": "releases/development-20261011/pack-hidden.ps1",
+    "script_executed": false,
+    "team_key_read": false,
+    "platform_upload": "Not attempted because saved CodaBench access denial remains in force."
+  }
 }
